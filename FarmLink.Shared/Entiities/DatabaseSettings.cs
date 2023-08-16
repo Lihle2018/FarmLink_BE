@@ -1,6 +1,6 @@
 ﻿namespace FarmLink.Shared.Entiities
 {
-    public class DatabaseSettings
+    public sealed class DatabaseSettings
     {
         public string UserCollectionName { get; set; }
         public string ProductCollectionName { get; set; }
