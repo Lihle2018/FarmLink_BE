@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
+using FarmLink.Shared.RequestModels;
 
 namespace FarmLink.Shared.Entiities
 {
@@ -9,7 +10,7 @@ namespace FarmLink.Shared.Entiities
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         public string CustomerId { get; set; }
-        public ICollection<OrderItem> Items { get; set; }
+        public List<OrderItem> Items { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public OrderStatus Status { get; set; }
@@ -23,12 +24,36 @@ namespace FarmLink.Shared.Entiities
         public string CancellationReason { get; set; }
         public decimal RefundAmount { get; set; }
         public int VendorId { get; set; }
-        public Vendor Vendor { get; set; }
+        public State State { get; set; }
+        public Order() { }
+        public Order(OrderRequestModel Request)
+        {
+            Id= Request.Id;
+            CustomerId= Request.CustomerId;
+            Items= Request.Items;
+            CreatedAt = Request.CreatedAt;
+            UpdatedAt = Request.UpdatedAt;
+            Status = Request.Status;
+            TotalAmount = Request.TotalAmount;
+            TaxAmount = Request.TaxAmount;
+            DeliveryFee= Request.DeliveryFee;
+            PaymentMethod= Request.PaymentMethod;
+            PaymentTransactionId= Request.PaymentTransactionId;
+            DeliveryNote= Request.DeliveryNote;
+            DeliveryWindow= Request.DeliveryWindow;
+            CancellationReason= Request.CancellationReason;
+            RefundAmount= Request.RefundAmount;
+            VendorId= Request.VendorId;
+            State= Request.State;
+        }
     }
-    public enum PaymentMethod 
+    public enum PaymentMethod
     {
+        CreditCard,
+        BankTransfer,
+        Cash,
+        MobilePayment
     }
-
     public enum OrderStatus
     {
         Pending,

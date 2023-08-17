@@ -54,7 +54,6 @@ namespace Infrastructure.Repositories
             var customer = new Customer(Request);
             await _customers.InsertOneAsync(customer);
             return customer;
-
         }
         public async Task<long> DeleteCustomerAsync(string Id)
         {
