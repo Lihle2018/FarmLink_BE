@@ -1,6 +1,7 @@
 using FarmLink.Shared.Services;
 using IdentityService.Services;
 using Infrastructure.Repositories;
+using Infrastructure.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

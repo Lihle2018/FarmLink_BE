@@ -1,4 +1,5 @@
 ﻿using FarmLink.Shared.Entiities;
+using FarmLink.Shared.Enumarations;
 using FarmLink.Shared.RequestModels;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;

@@ -1,6 +1,4 @@
-﻿
-
-namespace FarmLink.Shared.Entiities
+﻿namespace FarmLink.Shared.Entiities
 {
     public class Review
     {

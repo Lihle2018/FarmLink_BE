@@ -1,4 +1,7 @@
-using Infrastructure.Repositories;
+using CustomerService.Data;
+using CustomerService.Data.Interfaces;
+using CustomerService.Repositories;
+using CustomerService.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IFarmLinkContext,FarmLinkContext>();
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {
     builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();

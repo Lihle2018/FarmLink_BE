@@ -1,75 +1,49 @@
-﻿using FarmLink.Shared.Entiities;
-using FarmLink.Shared.RequestModels;
-using Infrastructure.Repositories.Interfaces;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
+﻿using CustomerService.Data.Interfaces;
+using CustomerService.Repositories.Interfaces;
+using FarmLink.CustomerService.Models;
+using FarmLink.CustomerService.Models.RequestModels;
+using FarmLink.Shared.Enumarations;
 using MongoDB.Driver;
 
-namespace Infrastructure.Repositories
+namespace CustomerService.Repositories
 {
-   
     public class CustomerRepository : ICustomerRepository
     {
-        IMongoCollection<Customer> _customers;
-        private readonly IConfiguration _configuration;
+        private readonly IFarmLinkContext _context;
 
-        private readonly IOptions<DatabaseSettings> _config;
-
-        public CustomerRepository(IOptions<DatabaseSettings> config, IConfiguration configuration)
+        public CustomerRepository(IFarmLinkContext context)
         {
-            _config = config;
-
-            _configuration = configuration;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public bool Connect()
-        {
-            try
-            {
-                var t = _config.Value;
-                var client = new MongoClient(_configuration.GetSection("CustomersTableConnection").Value);
-                var database = client.GetDatabase(_configuration.GetSection("CustomersTableName").Value);
-
-                _customers = database.GetCollection<Customer>(_configuration.GetSection("CustomersCollectionName").Value);
-                return true;
-
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
+       
         public async Task<Customer> AddCustomerAsync(CustomerRequestModel Request)
         {
-            Connect();
             var customer = new Customer(Request);
-            await _customers.InsertOneAsync(customer);
+            await _context.Customers.InsertOneAsync(customer);
             return customer;
         }
         public async Task<long> DeleteCustomerAsync(string Id)
         {
-            Connect();
             var filter = Builders<Customer>.Filter.Eq(c => c.Id, Id);
-            var result = await _customers.DeleteOneAsync(filter);
+            var result = await _context.Customers.DeleteOneAsync(filter);
             return result.DeletedCount;
         }
 
-        public async Task<List<Customer>> GetAllCustomers()
+        public async Task<IEnumerable<Customer>> GetCustomersAsync()
         {
-            Connect();
-            return ExcludeDeletedCusmers((await _customers.FindAsync(c => true)).ToList());
+            var result = await _context.Customers.FindAsync(c => true);
+            return  ExcludeDeletedCusmers(result.ToEnumerable());
         }
 
-        public async Task<Customer> GetCustomerByIdAsync(string Id)
+        public async Task<Customer> GetCustomerAsync(string Id)
         {
-            Connect();
-            var result = await _customers.FindAsync(c => c.Id == Id&&c.State==State.Active);
+            var result = await _context.Customers.FindAsync(c => c.Id == Id && c.State == State.Active);
             return result.FirstOrDefault();
         }
 
         public async Task<Customer> UpdateCustomerAsync(CustomerRequestModel request)
         {
-            Connect();
             var filter = Builders<Customer>.Filter.Eq(c => c.Id, request.Id);
             var update = Builders<Customer>.Update
                 .Set(c => c.UserId, request.UserId)
@@ -89,7 +63,7 @@ namespace Infrastructure.Repositories
                 ReturnDocument = ReturnDocument.After
             };
 
-            var updatedCustomer = await _customers.FindOneAndUpdateAsync(filter, update, options);
+            var updatedCustomer = await _context.Customers.FindOneAndUpdateAsync(filter, update, options);
             return updatedCustomer;
         }
 
@@ -97,16 +71,15 @@ namespace Infrastructure.Repositories
 
         public async Task<long> SoftDeleteCustomerAsync(string Id)
         {
-            Connect();
             var filter = Builders<Customer>.Filter.Eq(c => c.Id, Id);
             var update = Builders<Customer>.Update
                 .Set(c => c.State, State.Deleted)
                 .Set(c => c.DeletedAt, DateTime.UtcNow.ToString());
 
-            var result = await _customers.UpdateOneAsync(filter, update);
+            var result = await _context.Customers.UpdateOneAsync(filter:filter,update:update);
             return result.ModifiedCount;
         }
-        private List<Customer> ExcludeDeletedCusmers(List<Customer> customers)
+        private IEnumerable<Customer> ExcludeDeletedCusmers(IEnumerable<Customer> customers)
         {
             return customers.Where(c => c.State == State.Active).ToList();
         }

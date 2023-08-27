@@ -1,9 +1,10 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
-using FarmLink.Shared.RequestModels;
+﻿using FarmLink.CustomerService.Models.RequestModels;
+using FarmLink.Shared.Entiities;
 using FarmLink.Shared.Enumarations;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace FarmLink.Shared.Entiities
+namespace FarmLink.CustomerService.Models
 {
     /// <summary>
     /// Represents a customer who purchases products from vendors at the farmer's market.
