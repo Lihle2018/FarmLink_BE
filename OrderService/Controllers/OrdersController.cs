@@ -15,9 +15,10 @@ namespace OrderService.Controllers
 
         public OrdersController(IOrderRepository repository, ILogger<OrdersController> logger)
         {
-            _repository = repository;
-            _logger = logger;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
+
         [HttpPost("AddOrder")]
         [ProducesResponseType(typeof(OrderResponseModel), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<OrderResponseModel>> AddOrder(OrderRequestModel Request)
@@ -44,7 +45,7 @@ namespace OrderService.Controllers
         [ProducesResponseType(typeof(IEnumerable<OrderResponseModel>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<OrderResponseModel>>> GetOrders()
         {
-            var result = await _repository.GetOrdersAsync();
+            var result = await ExecuteWithLogging(()=> _repository.GetOrdersAsync());
             return Ok(result);
         }
 
@@ -78,6 +79,15 @@ namespace OrderService.Controllers
             _logger.LogInformation("[END] " + logName);
             return new OrderResponseModel(result);
         }
+        #region Helpers
+        private async Task<IEnumerable<OrderResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<Order>>> action)
+        {
+            var logName = MethodBase.GetCurrentMethod()?.Name;
+            _logger.LogInformation("[BEGIN] " + logName);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return result.Select(x => new OrderResponseModel(x));
+        }
 
         private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)
         {
@@ -95,5 +105,6 @@ namespace OrderService.Controllers
             else
                 return StatusCode(500,$"Multiple actions were completed: {logName}, number of actions completed: {result}");
         }
+        #endregion
     }
 }
