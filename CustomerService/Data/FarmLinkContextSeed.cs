@@ -19,7 +19,6 @@ namespace CustomerService.Data
     {
         new Customer
         {
-            Id = "1",
             UserId = "user123",
             Name = "John",
             LastName = "Doe",
@@ -42,7 +41,6 @@ namespace CustomerService.Data
         },
         new Customer
         {
-            Id = "2",
             UserId = "user789",
             Name = "Jane",
             LastName = "Smith",
