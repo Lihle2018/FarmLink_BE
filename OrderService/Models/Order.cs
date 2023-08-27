@@ -1,8 +1,9 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 using FarmLink.Shared.RequestModels;
+using FarmLink.Shared.Enumarations;
 
-namespace FarmLink.Shared.Entiities
+namespace FarmLink.OrderService.Models
 {
     public class Order
     {
@@ -23,7 +24,7 @@ namespace FarmLink.Shared.Entiities
         public DeliveryWindow DeliveryWindow { get; set; }
         public string CancellationReason { get; set; }
         public decimal RefundAmount { get; set; }
-        public int VendorId { get; set; }
+        public string VendorId { get; set; }
         public State State { get; set; }
         public Order() { }
         public Order(OrderRequestModel Request)
@@ -58,6 +59,7 @@ namespace FarmLink.Shared.Entiities
     {
         Pending,
         Confirmed,
+        Processing,
         Shipped,
         Delivered,
         Cancelled

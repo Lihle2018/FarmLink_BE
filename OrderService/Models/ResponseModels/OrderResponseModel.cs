@@ -1,6 +1,6 @@
-﻿using FarmLink.Shared.Entiities;
+﻿using FarmLink.Shared.ResponseModel;
 
-namespace FarmLink.Shared.ResponseModel
+namespace FarmLink.OrderService.Models
 {
     public class OrderResponseModel:ResponseBase<Order>
     {

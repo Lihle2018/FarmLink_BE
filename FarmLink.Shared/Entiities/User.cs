@@ -1,4 +1,5 @@
-﻿using FarmLink.Shared.RequestModels;
+﻿using FarmLink.Shared.Enumarations;
+using FarmLink.Shared.RequestModels;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 namespace FarmLink.Shared.Entiities
@@ -48,9 +49,5 @@ namespace FarmLink.Shared.Entiities
     public enum Role
     {
         Admin=0, Customer=1,Vendor=2,FarmersMarket=3
-    }
-    public enum State
-    {
-        Active=0,Deleted=1,Inactive=2
     }
 }

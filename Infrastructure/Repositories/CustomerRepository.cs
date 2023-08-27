@@ -1,22 +1,13 @@
 ﻿using FarmLink.Shared.Entiities;
 using FarmLink.Shared.RequestModels;
+using Infrastructure.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace Infrastructure.Repositories
 {
-    public interface ICustomerRepository
-    {
-        bool Connect();
-        Task<Customer> AddCustomerAsync(CustomerRequestModel Request);
-        Task<Customer> UpdateCustomerAsync(CustomerRequestModel Request);
-        Task<long> DeleteCustomerAsync(string Id);
-        Task<long> SoftDeleteCustomerAsync(string Id);
-        Task<Customer> GetCustomerByIdAsync(string Id);
-        Task<List<Customer>> GetAllCustomers();
-
-    }
+   
     public class CustomerRepository : ICustomerRepository
     {
         IMongoCollection<Customer> _customers;

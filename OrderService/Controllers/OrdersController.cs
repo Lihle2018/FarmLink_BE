@@ -1,7 +1,7 @@
-﻿using FarmLink.Shared.RequestModels;
-using FarmLink.Shared.ResponseModel;
-using Infrastructure.Repositories;
+﻿using FarmLink.OrderService.Models;
 using Microsoft.AspNetCore.Mvc;
+using OrderService.Repositories.Interfaces;
+using System.Net;
 using System.Reflection;
 
 namespace OrderService.Controllers
@@ -19,48 +19,81 @@ namespace OrderService.Controllers
             _logger = logger;
         }
         [HttpPost("AddOrder")]
-        public async Task<IActionResult> AddOrder(OrderRequestModel Request)
+        [ProducesResponseType(typeof(OrderResponseModel), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<OrderResponseModel>> AddOrder(OrderRequestModel Request)
         {
-            var logName = MethodBase.GetCurrentMethod()?.Name;
-            _logger.LogInformation("[BEGIN] " + logName);
-            var result = new OrderResponseModel(await _repository.AddOrderAsync(Request));
-            _logger.LogInformation("[END] " + logName);
-            return new JsonResult(result);
+            var result = await ExecuteWithLogging(()=> _repository.AddOrderAsync(Request));
+            return Ok(result);
         }
-        [HttpPut("UpdateOrder")]
-        public async Task<IActionResult> UpdateOrder(OrderRequestModel Request)
+
+        [HttpGet("GetOrder")]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(OrderResponseModel), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<OrderResponseModel>> GetOrder(string Id)
         {
-            var logName = MethodBase.GetCurrentMethod()?.Name;
-            _logger.LogInformation("[BEGIN] " + logName);
-            var result = new OrderResponseModel(await _repository.UpdateOrderAsync(Request));
-            _logger.LogInformation("[END] " + logName);
-            return new JsonResult(result);
+            var result = await ExecuteWithLogging(() => _repository.GetOrderByAsync(Id));
+            if(result == null)
+            {
+                _logger.LogError($"Order with ID: {Id} is not Found");
+                return NotFound();
+            }
+            else { return Ok(result); }
+        }
+
+        [HttpGet("GetOrders")]
+        [ProducesResponseType(typeof(IEnumerable<OrderResponseModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<OrderResponseModel>>> GetOrders()
+        {
+            var result = await _repository.GetOrdersAsync();
+            return Ok(result);
+        }
+
+        [HttpPut("UpdateOrder")]
+        [ProducesResponseType(typeof(OrderResponseModel), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<OrderResponseModel>> UpdateOrder(OrderRequestModel Request)
+        {
+            var result = await ExecuteWithLogging(() => _repository.UpdateOrderAsync(Request));
+            return Ok(result);
         }
         [HttpDelete("DeleteOrder")]
-        public async Task<IActionResult> DeleteOrder(string Id)
+        public async Task<ActionResult> DeleteOrder(string id)
         {
-            var logName = MethodBase.GetCurrentMethod()?.Name;
-            _logger.LogInformation("[BEGIN] " + logName);
-            var result = await _repository.DeleteOrderAsync(Id);
-            if (result == 1)
-                return new JsonResult("Successfully deleted an order");
-            if (result == 0)
-                return new JsonResult("Order not deleted");
-            else
-                return new JsonResult($"More than one order is deleted ORDERID: {Id}, number of rows deleted {result}");
+            return await ExecuteActionAsync(() => _repository.DeleteOrderAsync(id));
         }
+
         [HttpDelete("SoftDeleteOrder")]
-        public async Task<IActionResult> SoftDeleteOrder(string Id)
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<ActionResult> SoftDeleteOrder(string id)
+        {
+            return await ExecuteActionAsync(() => _repository.SoftDeleteOrderAsync(id));
+        }
+
+        private async Task<OrderResponseModel> ExecuteWithLogging(Func<Task<Order>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
-            var result = await _repository.SoftDeleteOrderAsync(Id);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return new OrderResponseModel(result);
+        }
+
+        private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)
+        {
+            var logName = MethodBase.GetCurrentMethod()?.Name;
+            _logger.LogInformation("[BEGIN] " + logName);
+
+            var result = await action();
+
+            _logger.LogInformation("[END] " + logName);
+
             if (result == 1)
-                return new JsonResult("Successfully deleted an order");
+                return Ok("Successfully completed the action");
             if (result == 0)
-                return new JsonResult("Order not deleted");
+                return NotFound("Action was not completed");
             else
-                return new JsonResult($"More than one order is deleted ORDERID: {Id}, number of rows deleted {result}");
+                return StatusCode(500,$"Multiple actions were completed: {logName}, number of actions completed: {result}");
         }
     }
 }

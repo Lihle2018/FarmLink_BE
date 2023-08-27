@@ -1,6 +1,6 @@
 ﻿
 
-namespace FarmLink.Shared.Entiities
+namespace FarmLink.OrderService.Models
 {
     public sealed class DeliveryWindow
     {

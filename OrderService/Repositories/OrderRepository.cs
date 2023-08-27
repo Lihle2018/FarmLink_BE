@@ -1,79 +1,43 @@
-﻿using FarmLink.Shared.Entiities;
-using FarmLink.Shared.RequestModels;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
+﻿using FarmLink.OrderService.Models;
+using FarmLink.Shared.Enumarations;
 using MongoDB.Driver;
+using OrderService.Data.Interfaces;
+using OrderService.Repositories.Interfaces;
 
-namespace Infrastructure.Repositories
+namespace OrderService.Repositories
 {
-    public interface IOrderRepository
-    {
-        bool Connect();
-        Task<Order> AddOrderAsync(OrderRequestModel Request);
-        Task<Order> UpdateOrderAsync(OrderRequestModel Request);
-        Task<long> DeleteOrderAsync(string Id);
-        Task<long> SoftDeleteOrderAsync(string Id);
-        Task<Order> GetOrderByIdAsync(string Id);
-        Task<List<Order>> GetAllOrders();
-    }
     public class OrderRepository : IOrderRepository
     {
-        IMongoCollection<Order> _orders;
-        private readonly IConfiguration _configuration;
+        private readonly IFarmLinkContext _context;
 
-        private readonly IOptions<DatabaseSettings> _config;
-
-        public OrderRepository(IOptions<DatabaseSettings> config, IConfiguration configuration)
+        public OrderRepository(IFarmLinkContext context)
         {
-            _config = config;
-
-            _configuration = configuration;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public bool Connect()
-        {
-            try
-            {
-                var t = _config.Value;
-                var client = new MongoClient(_configuration.GetSection("OrdersTableConnection").Value);
-                var database = client.GetDatabase(_configuration.GetSection("OrdersTableName").Value);
-
-                _orders = database.GetCollection<Order>(_configuration.GetSection("OrdersCollectionName").Value);
-                return true;
-
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
         public async Task<Order> AddOrderAsync(OrderRequestModel Request)
         {
-            Connect();
             var order = new Order(Request);
-            await _orders.InsertOneAsync(order);
+            await _context.Orders.InsertOneAsync(order);
             return order;
         }
 
         public async Task<long> DeleteOrderAsync(string Id)
         {
-            Connect();
             var filter = Builders<Order>.Filter.Eq(c => c.Id, Id);
-            var result = await _orders.DeleteOneAsync(filter);
+            var result = await _context.Orders.DeleteOneAsync(filter);
             return result.DeletedCount;
         }
 
-        public async Task<List<Order>> GetAllOrders()
+        public async Task<IEnumerable<Order>> GetOrdersAsync()
         {
-            Connect();
-            var orders = await _orders.FindAsync(o => true);
+            var orders = await _context.Orders.FindAsync(o => true);
             return ExcludeDeletedOrders(orders.ToList());
         }
 
-        public async Task<Order> GetOrderByIdAsync(string Id)
+        public async Task<Order> GetOrderByAsync(string Id)
         {
-            Connect();
-            var result=await _orders.FindAsync(o=>o.Id == Id&&o.State==State.Active);
+            var result = await _context.Orders.FindAsync(o => o.Id == Id && o.State == State.Active);
             return result.FirstOrDefault();
         }
 
@@ -103,7 +67,7 @@ namespace Infrastructure.Repositories
                 ReturnDocument = ReturnDocument.After
             };
 
-            return await _orders.FindOneAndUpdateAsync(filter, update, options);
+            return await _context.Orders.FindOneAndUpdateAsync(filter, update, options);
         }
 
         public async Task<long> SoftDeleteOrderAsync(string id)
@@ -113,12 +77,12 @@ namespace Infrastructure.Repositories
                 .Set(o => o.State, State.Deleted)
                 .Set(o => o.UpdatedAt, DateTime.UtcNow);
 
-            var updateResult = await _orders.UpdateOneAsync(filter, update);
+            var updateResult = await _context.Orders.UpdateOneAsync(filter, update);
             return updateResult.ModifiedCount;
         }
-        private List<Order> ExcludeDeletedOrders(List<Order> orders)
+        private IEnumerable<Order> ExcludeDeletedOrders(IEnumerable<Order> orders)
         {
-            return orders.Where(o=>o.State==State.Active).ToList();
+            return orders.Where(o => o.State == State.Active).ToList();
         }
     }
 }
