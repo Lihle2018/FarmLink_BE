@@ -1,12 +1,11 @@
-﻿using FarmLink.Shared.Entiities;
-using FarmLink.Shared.RequestModels;
+﻿using FarmLink.IndentityService.Models.RequestModels;
+using FarmLink.IndentityService.Models;
 
-namespace Infrastructure.Repositories.Interfaces
+namespace IdentityService.Repositories.Interfaces
 {
     public interface IUserRepository
     {
-        bool Connect();
-        Task<List<User>> GetAllUsersAsync();
+        Task<IEnumerable<User>> GetUsersAsync();
         Task<User> GetUserByIdAsync(string id);
         Task<User> GetUserByEmailAsync(string Email);
         Task<User> AddUserAsync(UserRequestModel Request);

@@ -1,8 +1,9 @@
-﻿using FarmLink.Shared.Enumarations;
-using FarmLink.Shared.RequestModels;
+﻿using FarmLink.IndentityService.Models.RequestModels;
+using FarmLink.Shared.Entiities;
+using FarmLink.Shared.Enumarations;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-namespace FarmLink.Shared.Entiities
+namespace FarmLink.IndentityService.Models
 {
     public class User
     {

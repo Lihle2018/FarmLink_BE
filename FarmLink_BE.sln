@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryService", "Invento
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReviewService", "ReviewService\ReviewService.csproj", "{DE293171-59E5-4ACB-BDE9-9F58DA291D8C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{B0999ABC-F990-46A4-B53A-B7643D548EA8}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FarmLink.Shared", "FarmLink.Shared\FarmLink.Shared.csproj", "{07CF6FD8-95BD-47CE-AA5B-1E4ECFFA2C03}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{75DCB85D-62E6-4289-A948-3A4022569889}"
@@ -51,10 +49,6 @@ Global
 		{DE293171-59E5-4ACB-BDE9-9F58DA291D8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE293171-59E5-4ACB-BDE9-9F58DA291D8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE293171-59E5-4ACB-BDE9-9F58DA291D8C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B0999ABC-F990-46A4-B53A-B7643D548EA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B0999ABC-F990-46A4-B53A-B7643D548EA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B0999ABC-F990-46A4-B53A-B7643D548EA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B0999ABC-F990-46A4-B53A-B7643D548EA8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{07CF6FD8-95BD-47CE-AA5B-1E4ECFFA2C03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{07CF6FD8-95BD-47CE-AA5B-1E4ECFFA2C03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07CF6FD8-95BD-47CE-AA5B-1E4ECFFA2C03}.Release|Any CPU.ActiveCfg = Release|Any CPU

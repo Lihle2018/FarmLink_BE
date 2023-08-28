@@ -1,4 +1,4 @@
-﻿namespace FarmLink.Shared.RequestModels
+﻿namespace FarmLink.IndentityService.Models.RequestModels
 {
     public class LoginRequestModel
     {

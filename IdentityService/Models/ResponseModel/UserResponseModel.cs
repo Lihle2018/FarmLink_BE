@@ -1,6 +1,6 @@
-﻿using FarmLink.Shared.Entiities;
+﻿using FarmLink.Shared.ResponseModel;
 
-namespace FarmLink.Shared.ResponseModel
+namespace FarmLink.IndentityService.Models.RequestModels
 {
     public class UserResponseModel:ResponseBase<User>
     {

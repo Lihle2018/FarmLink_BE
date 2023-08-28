@@ -1,6 +1,5 @@
-﻿using FarmLink.Shared.Entiities;
-
-namespace FarmLink.Shared.RequestModels
+﻿
+namespace FarmLink.IndentityService.Models.RequestModels
 {
     public class UserRequestModel:User
     {
