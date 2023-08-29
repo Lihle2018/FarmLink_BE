@@ -63,7 +63,7 @@ namespace CustomerService.Controllers
         [HttpDelete("SoftDeleteCustomer")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InsufficientStorage)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SoftDeleteCustomer(string Id)
         {
             return await ExecuteActionAsync(() => _repository.SoftDeleteCustomerAsync(Id));
