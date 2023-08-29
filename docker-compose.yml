@@ -43,3 +43,17 @@ services:
       context: .
       dockerfile: ReviewService/Dockerfile
 
+
+  promotionsservice:
+    image: ${DOCKER_REGISTRY-}promotionsservice
+    build:
+      context: .
+      dockerfile: PromotionsService/Dockerfile
+
+
+  communicationservice:
+    image: ${DOCKER_REGISTRY-}communicationservice
+    build:
+      context: .
+      dockerfile: CommunicationService/Dockerfile
+
