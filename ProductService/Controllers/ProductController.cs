@@ -88,6 +88,7 @@ namespace ProductService.Controllers
             }
             return Ok(result);
         }
+
         [HttpGet("SearchProducts")]
         [ProducesResponseType(typeof(IEnumerable<ProductResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -101,6 +102,7 @@ namespace ProductService.Controllers
             }
             return Ok(result);
         }
+
         #region Helpers
         private async Task<ProductResponseModel> ExecuteWithLogging(Func<Task<Product>> action)
         {
