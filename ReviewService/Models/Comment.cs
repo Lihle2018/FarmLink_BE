@@ -11,7 +11,7 @@ namespace ReviewService.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         public string Message { get; set; }
-        public string CreatingUser { get; set; }
+        public string CreatingUserId { get; set; }
         public string CreatedDate { get; set; }
         public string ModifiedDate { get; set; }
         public string ModifyingUser { get; set; }
@@ -23,7 +23,7 @@ namespace ReviewService.Models
         {
             Id = request.Id;
             Message = request.Message;
-            CreatingUser = request.CreatingUser;
+            CreatingUserId = request.CreatingUserId;
             CreatedDate = request.CreatedDate;
             ModifiedDate = request.ModifiedDate;
             ModifyingUser = request.ModifyingUser;
