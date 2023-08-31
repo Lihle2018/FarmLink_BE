@@ -24,7 +24,7 @@ namespace ReviewService.Data
             new Comment
             {
                 Message = "This is the first comment.",
-                CreatingUser = "user1",
+                CreatingUserId = "user1",
                 CreatedDate = DateTime.UtcNow.ToString(),
                 ModifiedDate = DateTime.UtcNow.ToString(),
                 ModifyingUser = "user1",
@@ -35,7 +35,7 @@ namespace ReviewService.Data
             new Comment
             {
                 Message = "Reply to the first comment.",
-                CreatingUser = "user2",
+                CreatingUserId = "user2",
                 CreatedDate = DateTime.UtcNow.ToString(),
                 ModifiedDate = DateTime.UtcNow.ToString(),
                 ModifyingUser = "user2",
@@ -46,7 +46,7 @@ namespace ReviewService.Data
             new Comment
             {
                 Message = "Another comment here.",
-                CreatingUser = "user3",
+                CreatingUserId = "user3",
                 CreatedDate = DateTime.UtcNow.ToString(),
                 ModifiedDate = DateTime.UtcNow.ToString(),
                 ModifyingUser = "user3",
@@ -57,7 +57,7 @@ namespace ReviewService.Data
             new Comment
             {
                 Message = "Inactive comment.",
-                CreatingUser = "user4",
+                CreatingUserId = "user4",
                 CreatedDate = DateTime.UtcNow.ToString(),
                 ModifiedDate = DateTime.UtcNow.ToString(),
                 ModifyingUser = "user4",
