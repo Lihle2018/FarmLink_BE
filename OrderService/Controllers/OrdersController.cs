@@ -71,6 +71,7 @@ namespace OrderService.Controllers
             return await ExecuteActionAsync(() => _repository.SoftDeleteOrderAsync(id));
         }
 
+        #region Helpers
         private async Task<OrderResponseModel> ExecuteWithLogging(Func<Task<Order>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
@@ -79,7 +80,6 @@ namespace OrderService.Controllers
             _logger.LogInformation("[END] " + logName);
             return new OrderResponseModel(result);
         }
-        #region Helpers
         private async Task<IEnumerable<OrderResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<Order>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
