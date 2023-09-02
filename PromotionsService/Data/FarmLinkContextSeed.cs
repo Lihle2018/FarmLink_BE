@@ -31,7 +31,7 @@ namespace PromotionsService.Data
             CreatedDate = DateTime.Now,
             ModifiedBy = "Admin",
             ModifiedDate = DateTime.Now,
-            TargetAudience = PromotionTargetAudience.AllCustomers
+            TargetAudience = PromotionTargetAudienceRequestModel.AllCustomers
         },
         new Promotion
         {
@@ -47,7 +47,7 @@ namespace PromotionsService.Data
             CreatedDate = DateTime.Now,
             ModifiedBy = "Admin",
             ModifiedDate = DateTime.Now,
-            TargetAudience = PromotionTargetAudience.AllCustomers
+            TargetAudience = PromotionTargetAudienceRequestModel.AllCustomers
         }
     };
         }

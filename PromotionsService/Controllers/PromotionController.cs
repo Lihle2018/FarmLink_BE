@@ -73,12 +73,42 @@ namespace PromotionsService.Controllers
         }
 
         [HttpGet("GetPromotions")]
-        [ProducesResponseType(typeof(PromotionResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<PromotionResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<PromotionResponseModel>> GetPromotions()
+        public async Task<ActionResult<IEnumerable<PromotionResponseModel>>> GetPromotions()
         {
             var result = await ExecuteWithLogging(async () => await _repository.GetPromotionsAsync());
+            var first = result.FirstOrDefault();
+            if (first.Data == null && !first.Error)
+                return NotFound(result);
+            if (first.Error)
+                return StatusCode(500, result);
+            return Ok(result);
+        }
+
+        [HttpGet("GetPromotionsByTargetAudience")]
+        [ProducesResponseType(typeof(IEnumerable<PromotionResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<ActionResult<IEnumerable<PromotionResponseModel>>> GetPromotionsByTargetAudience(PromotionsByTargetAudienceRequestModel Request)
+        {
+            var result = await ExecuteWithLogging(async () => await _repository.GetPromotionsByTargetAudienceAsync(Request.TargetAudience));
+            var first = result.FirstOrDefault();
+            if (first.Data == null && !first.Error)
+                return NotFound(result);
+            if (first.Error)
+                return StatusCode(500, result);
+            return Ok(result);
+        }
+
+        [HttpGet("GetPromotionsByType")]
+        [ProducesResponseType(typeof(IEnumerable<PromotionResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<ActionResult<IEnumerable<PromotionResponseModel>>> GetPromotionsByType(PromotionsByTypeTypeRequestModel Request)
+        {
+            var result = await ExecuteWithLogging(async () => await _repository.GetPromotionsByTypeAsync(Request.PromotionType));
             var first = result.FirstOrDefault();
             if (first.Data == null && !first.Error)
                 return NotFound(result);
