@@ -57,3 +57,10 @@ services:
       context: .
       dockerfile: CommunicationService/Dockerfile
 
+
+  vendorservice:
+    image: ${DOCKER_REGISTRY-}vendorservice
+    build:
+      context: .
+      dockerfile: VendorService/Dockerfile
+
