@@ -14,7 +14,8 @@
         "productservice": "StartDebugging",
         "reviewservice": "StartDebugging",
         "promotionsservice": "StartDebugging",
-        "communicationservice": "StartDebugging"
+        "communicationservice": "StartDebugging",
+        "vendorservice": "StartDebugging"
       }
     }
   }

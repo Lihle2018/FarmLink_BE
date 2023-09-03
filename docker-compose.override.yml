@@ -1,6 +1,79 @@
 version: '3.4'
 
 services:
+
+  vendorsdb:
+    container_name: farmlink_vendorsdb
+    restart: always
+    ports:
+        - "27017:27017"
+    volumes:
+        - mongo_data:/data/db
+    command: ["mongod", "--port", "27017"]
+  
+  productsdb:
+    container_name: farmlink_productsdb
+    restart: always
+    ports:
+        - "27018:27017"
+    volumes:
+        - mongo_data:/data/db
+    command: ["mongod", "--port", "27017"]
+  
+  ordersdb:
+    container_name: farmlink_ordersdb
+    restart: always
+    ports:
+        - "27019:27017"
+    volumes:
+        - mongo_data:/data/db
+    command: ["mongod", "--port", "27017"]
+  
+  customersdb:
+    container_name: farmlink_customersdb
+    restart: always
+    ports:
+        - "27020:27017"
+    volumes:
+        - mongo_data:/data/db
+    command: ["mongod", "--port", "27017"]
+
+  usersdb:
+    container_name: farmlink_usersdb
+    restart: always
+    ports:
+        - "27021:27017"
+    volumes:
+        - mongo_data:/data/db
+    command: ["mongod", "--port", "27017"]
+  
+  promotionsdb:
+    container_name: farmlink_promotionsdb
+    restart: always
+    ports:
+        - "27022:27017"
+    volumes:
+        - mongo_data:/data/db
+    command: ["mongod", "--port", "27017"]
+  
+  reviewsdb:
+    container_name: farmlink_reviewsdb
+    restart: always
+    ports:
+        - "27023:27017"
+    volumes:
+        - mongo_data:/data/db
+    command: ["mongod", "--port", "27017"]
+  
+  inventorydb:
+    container_name: farmlink_inventorydb
+    restart: always
+    ports:
+        - "27024:27017"
+    volumes:
+        - mongo_data:/data/db
+    command: ["mongod", "--port", "27017"]
+  
   customerservice:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development

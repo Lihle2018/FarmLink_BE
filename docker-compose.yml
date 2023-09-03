@@ -2,6 +2,28 @@ version: '3.4'
 
 
 services:
+  vendorsdb:
+     image: mongo
+
+  productsdb:
+     image: mongo
+
+  ordersdb:
+     image: mongo
+
+  customersdb:
+     image: mongo
+
+  usersdb:
+     image: mongo
+  
+  promotionsdb:
+     image: mongo
+  
+  reviewsdb:
+     image: mongo
+  inventorydb:
+     image: mongo
   
   customerservice:
     image: ${DOCKER_REGISTRY-}customerservice
@@ -63,4 +85,6 @@ services:
     build:
       context: .
       dockerfile: VendorService/Dockerfile
+volumes:
+  mongo_data:
 

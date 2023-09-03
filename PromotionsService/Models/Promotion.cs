@@ -34,7 +34,7 @@ namespace PromotionsService.Models
         public string ModifiedBy { get; set; }
 
         public DateTime ModifiedDate { get; set; }
-        public PromotionTargetAudienceRequestModel TargetAudience { get; set; }
+        public PromotionTargetAudience TargetAudience { get; set; }
 
         public Promotion() { }
         public Promotion(PromotionRequestModel promotion)

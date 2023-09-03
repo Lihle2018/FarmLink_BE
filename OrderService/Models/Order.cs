@@ -1,6 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
-using FarmLink.Shared.RequestModels;
 using FarmLink.Shared.Enumarations;
 
 namespace FarmLink.OrderService.Models
