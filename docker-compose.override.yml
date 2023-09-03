@@ -74,6 +74,11 @@ services:
         - mongo_data:/data/db
     command: ["mongod", "--port", "27017"]
   
+  redis_cachedb:
+    container_name: farmlink_redis_cachedb
+    restart: always    
+    ports:
+        - "6379:6379"
   customerservice:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development

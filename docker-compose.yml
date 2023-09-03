@@ -22,8 +22,12 @@ services:
   
   reviewsdb:
      image: mongo
+
   inventorydb:
      image: mongo
+
+  redis_cachedb:
+    image: redis:alpine
   
   customerservice:
     image: ${DOCKER_REGISTRY-}customerservice

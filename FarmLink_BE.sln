@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommunicationService", "Com
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PromotionsService", "PromotionsService\PromotionsService.csproj", "{3871409E-C583-4843-BA6F-6DFE4F09EFEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorService", "VendorService\VendorService.csproj", "{BEE2DA52-1451-44F4-ABA4-91847E1FF0DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VendorService", "VendorService\VendorService.csproj", "{BEE2DA52-1451-44F4-ABA4-91847E1FF0DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedisCache", "RedisCache\RedisCache.csproj", "{8860DEC9-9626-4B81-8ABD-7B10AECAD7C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{BEE2DA52-1451-44F4-ABA4-91847E1FF0DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEE2DA52-1451-44F4-ABA4-91847E1FF0DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BEE2DA52-1451-44F4-ABA4-91847E1FF0DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8860DEC9-9626-4B81-8ABD-7B10AECAD7C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8860DEC9-9626-4B81-8ABD-7B10AECAD7C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8860DEC9-9626-4B81-8ABD-7B10AECAD7C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8860DEC9-9626-4B81-8ABD-7B10AECAD7C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
