@@ -25,6 +25,9 @@ services:
 
   inventorydb:
      image: mongo
+  
+  chatmessagesdb:
+     image: mongo
 
   redis_cachedb:
     image: redis:alpine
