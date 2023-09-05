@@ -1,11 +1,12 @@
-﻿using FarmLink.Shared.Entiities;
-using FarmLink.Shared.RequestModels;
-using FarmLink.Shared.ResponseModel;
+﻿using FarmLink.IndentityService.Models;
+using FarmLink.IndentityService.Models.RequestModels;
+using FarmLink.Shared.Enumarations;
 using FarmLink.Shared.Services;
 using IdentityService.Extensions;
+using IdentityService.Repositories.Interfaces;
 using IdentityService.Services;
-using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using System.Reflection;
 
 namespace IdentityService.Controllers
@@ -20,87 +21,80 @@ namespace IdentityService.Controllers
         private readonly IHashingService _hashingService;
         public AccountController(IUserRepository repository, ILogger<AccountController> logger, IEmailService emailService, IHashingService hashingService)
         {
-            _repository = repository;
-            _logger = logger;
-            _emailService = emailService;
-            _hashingService = hashingService;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+            _hashingService = hashingService ?? throw new ArgumentNullException(nameof(hashingService));
         }
 
         [HttpPost("AddUser")]
-        public async Task<IActionResult> CreateUserAsync(UserRequestModel user)
+        [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult> CreateUserAsync(UserRequestModel user)
         {
-            var logName = MethodBase.GetCurrentMethod()?.Name;
-            _logger.LogInformation("[BEGIN] " + logName);
-            var hash = _hashingService.GenerateSaltAndHash(user.Password);
-            string otp = "".GenerateOtp();
-            user.Salt = hash.Salt;
-            user.Password = hash.Hash;
-            user.UserState = State.Inactive;
-            user.IsPhoneVerified = false;
-            user.IsEmailVerified = false;
-            user.Otp = otp;
-            var result = new UserResponseModel(await _repository.AddUserAsync(user));
-
-            string subject = $"Your Email Verification Code {otp}";
-            string body = $"Hello {user.FirstName},\n\n your verification code is: {otp}"; ;
-            await _emailService.SendEmail(user.Email, subject, body);
-            _logger.LogInformation("[END] " + logName);
-            return new JsonResult(result);
+            var result = await ExecuteWithLogging(async () =>
+            {
+                var hash = _hashingService.GenerateSaltAndHash(user.Password);
+                string otp = "".GenerateOtp();
+                user.Salt = hash.Salt;
+                user.Password = hash.Hash;
+                user.UserState = State.Inactive;
+                user.IsPhoneVerified = false;
+                user.IsEmailVerified = false;
+                user.Otp = otp;
+                var newUser = await _repository.AddUserAsync(user);
+                string subject = $"Your Email Verification Code {otp}";
+                string body = $"Hello {user.FirstName},\n\n your verification code is: {otp}"; ;
+                await _emailService.SendEmail(user.Email, subject, body);
+                return newUser;
+            });
+            return Ok(result);
         }
         [HttpPost("Login")]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Login(LoginRequestModel model)
         {
-            var logName = MethodBase.GetCurrentMethod()?.Name;
-            _logger.LogInformation("[BEGIN] " + logName);
             var user = await _repository.GetUserByEmailAsync(model.Email);
             if (user == null)
             {
-                return new JsonResult("User does not exist")
-                {
-                    StatusCode = 401
-                };
-
+                return NotFound();
             }
             else
             {
                 if (user.UserState == State.Inactive)
                 {
-                    return new JsonResult("The user account is inactive. Please verify your email or call support")
-                    {
-                        StatusCode = 401
-                    };
+                    return Unauthorized("The user account is inactive. Please verify your email or call support");
                 }
                 else
                 {
                     model.Password = _hashingService.HashPassword(model.Password, user.Salt);
-                    var result = new UserResponseModel(await _repository.LoginAsync(model));
-                    _logger.LogInformation("[END] " + logName);
-                    return new JsonResult(result);
+                    var result =await ExecuteWithLogging(()=> _repository.LoginAsync(model));
+                    if(result==null)
+                        return NotFound("Password or email is incorrect");
+                  return Ok(result);
                 }
             }
         }
         [HttpPost("SendOtpToVerifyUserEmail")]
-        public async Task<IActionResult> SendOtpToVerifyUserEmail(string Email)
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<UserResponseModel>> SendOtpToVerifyUserEmail(string Email)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
-
             var user = await _repository.GetUserByEmailAsync(Email);
             if (user == null)
             {
-                return new JsonResult("User does not exist")
-                {
-                    StatusCode = 401
-                };
+                return NotFound("User does not exist");
             }
             else
             {
                 if (user.UserState == State.Inactive)
                 {
-                    return new JsonResult("Your account is inactive. Call support to activate your account")
-                    {
-                        StatusCode = 401
-                    };
+                    return Unauthorized("Your account is inactive. Call support to activate your account");
                 }
                 else
                 {
@@ -112,57 +106,54 @@ namespace IdentityService.Controllers
                         $"\nX-Labs-24 solutions";
                     await _emailService.SendEmail(Email, subject, body);
                     var result = await _repository.UpdateUserOtpAsync(user);
-                    _logger.LogInformation("[END] " + logName);
                     if (result == 1)
                     {
-                        return new JsonResult(new UserResponseModel(user));
+                        return Ok(new UserResponseModel(user));
                     }
-                    return new JsonResult("Something went wrong")
-                    {
-                        StatusCode = 404
-                    };
+                    return StatusCode(500, "Something went wrong");
                 }
             }
         }
         [HttpPost("VerifyOtpAndActivateUser")]
-        public async Task<IActionResult> VerifyOtpAndActivateUser(VerifyOtpRequestModel request)
+        [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<UserResponseModel>> VerifyOtpAndActivateUser(VerifyOtpRequestModel request)
         {
-
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
-            User user;
-            user = await _repository.GetUserByIdAsync(request.UserId);
+
+            User user = await _repository.GetUserByIdAsync(request.UserId);
             if (user != null)
             {
                 if (user.Otp == request.Otp)
                 {
                     user.UserState = State.Active;
                     user.IsEmailVerified = true;
-                    var result = new UserResponseModel(await _repository.UpdateUserAsync(user));
+                    var result = await ExecuteWithLogging(async () => await _repository.UpdateUserAsync(user));
 
-                    return new JsonResult(result);
+                    return Ok(result);
                 }
                 else
                 {
-                    return new JsonResult("The otps do not match")
-                    {
-                        StatusCode = 422
-                    };
+                    return StatusCode(422, "The OTPs do not match");
                 }
             }
             else
             {
-                return new JsonResult("The user is not found")
-                {
-                    StatusCode = 401
-                };
+                return Unauthorized("The user is not found");
             }
         }
+
         [HttpPost("UpdatePassword")]
+        [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdatePassword(UpdatePasswordRequest Request)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
+
             var user = await _repository.GetUserByEmailAsync(Request.Email);
             if (user != null)
             {
@@ -171,55 +162,112 @@ namespace IdentityService.Controllers
                     var hash = _hashingService.GenerateSaltAndHash(Request.Password);
                     user.Password = hash.Hash;
                     user.Salt = hash.Salt;
-                    var result = new UserResponseModel(await _repository.UpdateUserPasswordAsync(user));
-                    return new JsonResult(result);
+                    var result = await ExecuteWithLogging(async () => await _repository.UpdateUserPasswordAsync(user));
+
+                    return Ok(result);
                 }
                 else
                 {
-                    return new JsonResult("The otp does no match")
-                    {
-                        StatusCode = 422
-                    };
+                    return StatusCode(422, "The OTP does not match");
                 }
             }
             else
             {
-                return new JsonResult("The user does not exist")
-                {
-                    StatusCode = 401
-                };
+                return Unauthorized("The user does not exist");
             }
         }
 
         [HttpGet("GetAllUsers")]
-        public async Task<IActionResult> GetAllUsers()
+        [ProducesResponseType(typeof(IEnumerable<UserResponseModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<UserResponseModel>>> GetAllUsers()
         {
-            var logName = MethodBase.GetCurrentMethod()?.Name;
-            _logger.LogInformation("[BEGIN] " + logName);
-            var users = await _repository.GetAllUsersAsync();
-            var result = users.Select(x => new UserResponseModel(x)).ToList();
-            _logger.LogInformation("[END] " + logName);
-            return new JsonResult(result);
+            var result = await ExecuteWithLogging(() => _repository.GetUsersAsync());
+           return Ok(result);
         }
 
         [HttpGet("GetUserById")]
-        public async Task<IActionResult> GetUserById(string Id)
+        [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<UserResponseModel>> GetUserById(string Id)
         {
-            var logName = MethodBase.GetCurrentMethod()?.Name;
-            _logger.LogInformation("[BEGIN] " + logName);
-            var result = new UserResponseModel(await _repository.GetUserByIdAsync(Id));
-            _logger.LogInformation("[END] " + logName);
-            return new JsonResult(result);
+            var result = await ExecuteWithLogging(async () =>
+            {
+                var user = await _repository.GetUserByIdAsync(Id);
+                if (user == null)
+                {
+                    return null;
+                }
+                return user;
+            });
+
+            if (result == null)
+            {
+                return NotFound("User not found");
+            }
+
+            return Ok(result);
         }
+
         [HttpGet("GetUserByEmail")]
-        public async Task<IActionResult> GetUserByEmail(string Email)
+        [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<UserResponseModel>> GetUserByEmail(string Email)
+        {
+            var result = await ExecuteWithLogging(async () =>
+            {
+                var user = await _repository.GetUserByEmailAsync(Email);
+                if (user == null)
+                {
+                    return null;
+                }
+                return user;
+            });
+
+            if (result == null)
+            {
+                return NotFound("User not found");
+            }
+
+            return Ok(result);
+        }
+
+
+        #region Helpers
+        private async Task<UserResponseModel> ExecuteWithLogging(Func<Task<User>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
-            var result = new UserResponseModel(await _repository.GetUserByEmailAsync(Email));
+            var result = await action.Invoke();
             _logger.LogInformation("[END] " + logName);
-            return new JsonResult(result);
+            return new UserResponseModel(result);
         }
+
+        private async Task<IEnumerable<UserResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<User>>> action)
+        {
+            var logName = MethodBase.GetCurrentMethod()?.Name;
+            _logger.LogInformation("[BEGIN] " + logName);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return result.Select(x => new UserResponseModel(x));
+        }
+
+        private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)
+        {
+            var logName = MethodBase.GetCurrentMethod()?.Name;
+            _logger.LogInformation("[BEGIN] " + logName);
+
+            var result = await action();
+
+            _logger.LogInformation("[END] " + logName);
+
+            if (result == 1)
+                return Ok("Successfully completed the action");
+            if (result == 0)
+                return NotFound("Action was not completed");
+            else
+                return StatusCode(500, $"Multiple actions were completed: {logName}, number of actions completed: {result}");
+        }
+        #endregion
     }
 }
 

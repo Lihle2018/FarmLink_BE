@@ -1,7 +1,7 @@
 ﻿
 namespace FarmLink.Shared.Entiities
 {
-    public class Address
+    public sealed class Address
     {
         public string StreetLine1 { get; set; }
         public string StreetLine2 { get; set; }

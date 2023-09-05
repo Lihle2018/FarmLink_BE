@@ -1,7 +1,9 @@
 using FarmLink.Shared.Services;
+using IdentityService.Data;
+using IdentityService.Data.Interfaces;
+using IdentityService.Repositories;
+using IdentityService.Repositories.Interfaces;
 using IdentityService.Services;
-using Infrastructure.Repositories;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -13,6 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<IHashingService, HashingService>();
+builder.Services.AddScoped<IFarmLinkContext,FarmLinkContext>();
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {
     builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
