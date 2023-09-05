@@ -8,7 +8,7 @@ services:
     ports:
         - "27017:27017"
     volumes:
-        - mongo_data:/data/db
+         - "/var/lib/mongodb-farmlink-vendors:/data/db"
     command: ["mongod", "--port", "27017"]
   
   productsdb:
@@ -17,7 +17,7 @@ services:
     ports:
         - "27018:27017"
     volumes:
-        - mongo_data:/data/db
+         - "/var/lib/mongodb-farmlink-products:/data/db"
     command: ["mongod", "--port", "27017"]
   
   ordersdb:
@@ -26,7 +26,7 @@ services:
     ports:
         - "27019:27017"
     volumes:
-        - mongo_data:/data/db
+         - "/var/lib/mongodb-farmlink-orders:/data/db"
     command: ["mongod", "--port", "27017"]
   
   customersdb:
@@ -35,7 +35,7 @@ services:
     ports:
         - "27020:27017"
     volumes:
-        - mongo_data:/data/db
+         - "/var/lib/mongodb-farmlink-customers:/data/db"
     command: ["mongod", "--port", "27017"]
 
   usersdb:
@@ -44,7 +44,7 @@ services:
     ports:
         - "27021:27017"
     volumes:
-        - mongo_data:/data/db
+         - "/var/lib/mongodb-farmlink-users:/data/db"
     command: ["mongod", "--port", "27017"]
   
   promotionsdb:
@@ -53,7 +53,7 @@ services:
     ports:
         - "27022:27017"
     volumes:
-        - mongo_data:/data/db
+         - "/var/lib/mongodb-farmlink-promotions:/data/db"
     command: ["mongod", "--port", "27017"]
   
   reviewsdb:
@@ -62,7 +62,7 @@ services:
     ports:
         - "27023:27017"
     volumes:
-        - mongo_data:/data/db
+        - "/var/lib/mongodb-farmlink-reviews:/data/db"
     command: ["mongod", "--port", "27017"]
   
   inventorydb:
@@ -71,7 +71,7 @@ services:
     ports:
         - "27024:27017"
     volumes:
-        - mongo_data:/data/db
+         - "/var/lib/mongodb-farmlink-inventory:/data/db"
     command: ["mongod", "--port", "27017"]
   
   redis_cachedb:
