@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Reflection;
-using VendorService.Models;
 using VendorService.Models.RequestModels;
 using VendorService.Models.ResponseModels;
 using VendorService.Repositories.Interfaces;
@@ -117,50 +116,22 @@ namespace VendorService.Controllers
         }
 
         #region Helpers
-        private async Task<VendorResponseModel> ExecuteWithLogging(Func<Task<Vendor>> action)
+        private async Task<VendorResponseModel> ExecuteWithLogging(Func<Task<VendorResponseModel>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
-            try
-            {
-                _logger.LogInformation("[BEGIN] " + logName);
-                var result = await action.Invoke();
-                if (result != null)
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return new VendorResponseModel(result);
-                }
-                _logger.LogInformation("[END] " + logName);
-                return new VendorResponseModel(result, $"{logName} operation failed.");
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("[END] " + logName);
-                return new VendorResponseModel(null, e.Message, true);
-            }
+            _logger.LogInformation("[BEGIN] " + logName);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return result;
         }
-        private async Task<IEnumerable<VendorResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<Vendor>>> action)
+
+        private async Task<IEnumerable<VendorResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<VendorResponseModel>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
-            try
-            {
-                _logger.LogInformation("[BEGIN] " + logName);
-                var result = await action.Invoke();
-                if (result != null)
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return result.Select(x => new VendorResponseModel(x));
-                }
-                else
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return new[] { new VendorResponseModel(null, $"{logName} operation failed.") };
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("[END] " + logName);
-                return new[] { new VendorResponseModel(null, e.Message, true) };
-            }
+            _logger.LogInformation("[BEGIN] " + logName);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return result;
         }
 
         private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)
