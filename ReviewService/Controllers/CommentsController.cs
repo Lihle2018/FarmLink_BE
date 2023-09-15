@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ReviewService.Models;
 using ReviewService.Models.RequestModels;
 using ReviewService.Models.ResponseModels;
 using ReviewService.Repositories.Interfaces;
-using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 
@@ -48,7 +46,6 @@ namespace ReviewService.Controllers
                 return StatusCode(500, result);
             return Ok(result);
         }
-
 
         [HttpGet("GetComment")]
         [ProducesResponseType(typeof(CommentResponseModel), (int)HttpStatusCode.OK)]
@@ -127,6 +124,7 @@ namespace ReviewService.Controllers
             _logger.LogInformation("[END] " + logName);
             return result;
         }
+
         private async Task<IEnumerable<CommentResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<CommentResponseModel>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;

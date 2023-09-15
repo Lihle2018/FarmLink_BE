@@ -1,12 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ReviewService.Models.ResponseModels;
-using ReviewService.Models;
-using ReviewService.Repositories.Interfaces;
-using System.Reflection;
+﻿using Microsoft.AspNetCore.Mvc;
 using ReviewService.Models.RequestModels;
+using ReviewService.Models.ResponseModels;
+using ReviewService.Repositories.Interfaces;
 using System.Net;
-
+using System.Reflection;
 namespace ReviewService.Controllers
 {
     [Route("api/[controller]")]
@@ -48,7 +45,6 @@ namespace ReviewService.Controllers
                 return StatusCode(500, result);
             return Ok(result);
         }
-
 
         [HttpGet("GetRating")]
         [ProducesResponseType(typeof(RatingResponseModel), (int)HttpStatusCode.OK)]
@@ -128,6 +124,7 @@ namespace ReviewService.Controllers
             return result;
 
         }
+
         private async Task<IEnumerable<RatingResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<RatingResponseModel>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
