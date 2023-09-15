@@ -17,8 +17,8 @@ namespace ReviewService.Controllers
         private readonly IRatingsRepository _repository;
         public RatingsController(ILogger logger, IRatingsRepository repository)
         {
-            _repository= repository??throw new ArgumentNullException(nameof(repository));
-            _logger = logger?? throw new ArgumentNullException(nameof(logger));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost("AddRating")]
@@ -65,10 +65,10 @@ namespace ReviewService.Controllers
         }
 
         [HttpGet("GetRatings")]
-        [ProducesResponseType(typeof(RatingResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<RatingResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<RatingResponseModel>> GetRatings()
+        public async Task<ActionResult<IEnumerable<RatingResponseModel>>> GetRatings()
         {
             var result = await ExecuteWithLogging(async () => await _repository.GetRatingsAsync());
             var first = result.FirstOrDefault();
@@ -80,10 +80,10 @@ namespace ReviewService.Controllers
         }
 
         [HttpGet("GetRatingsByUserId")]
-        [ProducesResponseType(typeof(RatingResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<RatingResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<RatingResponseModel>> GetRatingsByUserId(string userId)
+        public async Task<ActionResult<IEnumerable<RatingResponseModel>>> GetRatingsByUserId(string userId)
         {
             var result = await ExecuteWithLogging(async () => await _repository.GetRatingsByUserIdAsync(userId));
             var first = result.FirstOrDefault();
@@ -95,10 +95,10 @@ namespace ReviewService.Controllers
         }
 
         [HttpGet("GetRatingsByPostId")]
-        [ProducesResponseType(typeof(RatingResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<RatingResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<RatingResponseModel>> GetRatings(string postId)
+        public async Task<ActionResult<IEnumerable<RatingResponseModel>>> GetRatings(string postId)
         {
             var result = await ExecuteWithLogging(async () => await _repository.GetRatingsForPostAsync(postId));
             var first = result.FirstOrDefault();
@@ -119,50 +119,23 @@ namespace ReviewService.Controllers
         }
 
         #region Helpers
-        private async Task<RatingResponseModel> ExecuteWithLogging(Func<Task<Rating>> action)
+        private async Task<RatingResponseModel> ExecuteWithLogging(Func<Task<RatingResponseModel>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
-            try
-            {
-                _logger.LogInformation("[BEGIN] " + logName);
-                var result = await action.Invoke();
-                if (result != null)
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return new RatingResponseModel(result);
-                }
-                _logger.LogInformation("[END] " + logName);
-                return new RatingResponseModel(result, $"{logName} operation failed.");
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("[END] " + logName);
-                return new RatingResponseModel(null, e.Message, true);
-            }
+            _logger.LogInformation("[BEGIN] " + logName);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return result;
+
         }
-        private async Task<IEnumerable<RatingResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<Rating>>> action)
+        private async Task<IEnumerable<RatingResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<RatingResponseModel>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
-            try
-            {
-                _logger.LogInformation("[BEGIN] " + logName);
-                var result = await action.Invoke();
-                if (result != null)
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return result.Select(x => new RatingResponseModel(x));
-                }
-                else
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return new[] { new RatingResponseModel(null, $"{logName} operation failed.") };
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("[END] " + logName);
-                return new[] { new RatingResponseModel(null, e.Message, true) };
-            }
+            _logger.LogInformation("[BEGIN] " + logName);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return result;
+
         }
 
         private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)

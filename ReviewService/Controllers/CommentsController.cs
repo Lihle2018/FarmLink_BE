@@ -3,6 +3,7 @@ using ReviewService.Models;
 using ReviewService.Models.RequestModels;
 using ReviewService.Models.ResponseModels;
 using ReviewService.Repositories.Interfaces;
+using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 
@@ -64,10 +65,10 @@ namespace ReviewService.Controllers
         }
 
         [HttpGet("GetComments")]
-        [ProducesResponseType(typeof(CommentResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<CommentResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<CommentResponseModel>> GetComments()
+        public async Task<ActionResult<IEnumerable<CommentResponseModel>>> GetComments()
         {
             var result = await ExecuteWithLogging(async () => await _repository.GetCommentsAsync());
             var first = result.FirstOrDefault();
@@ -79,10 +80,10 @@ namespace ReviewService.Controllers
         }
 
         [HttpGet("GetCommentsByUserId")]
-        [ProducesResponseType(typeof(CommentResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<CommentResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<CommentResponseModel>> GetCommentsByUserId(string userId)
+        public async Task<ActionResult<IEnumerable<CommentResponseModel>>> GetCommentsByUserId(string userId)
         {
             var result = await ExecuteWithLogging(async () => await _repository.GetCommentsByUserIdAsync(userId));
             var first = result.FirstOrDefault();
@@ -94,10 +95,10 @@ namespace ReviewService.Controllers
         }
 
         [HttpGet("GetCommentsByPostId")]
-        [ProducesResponseType(typeof(CommentResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<CommentResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<CommentResponseModel>> GetComments(string postId)
+        public async Task<ActionResult<IEnumerable<CommentResponseModel>>> GetComments(string postId)
         {
             var result = await ExecuteWithLogging(async () => await _repository.GetCommentsForPostAsync(postId));
             var first = result.FirstOrDefault();
@@ -118,50 +119,22 @@ namespace ReviewService.Controllers
         }
 
         #region Helpers
-        private async Task<CommentResponseModel> ExecuteWithLogging(Func<Task<Comment>> action)
+        private async Task<CommentResponseModel> ExecuteWithLogging(Func<Task<CommentResponseModel>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
-            try
-            {
-                _logger.LogInformation("[BEGIN] " + logName);
-                var result = await action.Invoke();
-                if (result != null)
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return new CommentResponseModel(result);
-                }
-                _logger.LogInformation("[END] " + logName);
-                return new CommentResponseModel(result, $"{logName} operation failed.");
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("[END] " + logName);
-                return new CommentResponseModel(null, e.Message, true);
-            }
+            _logger.LogInformation("[BEGIN] " + logName);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return result;
         }
-        private async Task<IEnumerable<CommentResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<Comment>>> action)
+        private async Task<IEnumerable<CommentResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<CommentResponseModel>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
-            try
-            {
-                _logger.LogInformation("[BEGIN] " + logName);
-                var result = await action.Invoke();
-                if (result != null)
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return result.Select(x => new CommentResponseModel(x));
-                }
-                else
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return new[] { new CommentResponseModel(null, $"{logName} operation failed.") };
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("[END] " + logName);
-                return new[] { new CommentResponseModel(null, e.Message, true) };
-            }
+
+            _logger.LogInformation("[BEGIN] " + logName);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return result;
         }
 
         private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)

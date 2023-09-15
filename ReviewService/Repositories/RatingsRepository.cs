@@ -2,8 +2,8 @@
 using ReviewService.Data.Interfaces;
 using ReviewService.Models;
 using ReviewService.Models.RequestModels;
+using ReviewService.Models.ResponseModels;
 using ReviewService.Repositories.Interfaces;
-using System.Runtime.CompilerServices;
 
 namespace ReviewService.Repositories
 {
@@ -14,11 +14,19 @@ namespace ReviewService.Repositories
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
-        public async Task<Rating> AddRatingAsync(RatingRequestModel Request)
+
+        public async Task<RatingResponseModel> AddRatingAsync(RatingRequestModel Request)
         {
-            var rating = new Rating(Request);
-            await _context.Ratings.InsertOneAsync(rating);
-            return rating;
+            try
+            {
+                var rating = new Rating(Request);
+                await _context.Ratings.InsertOneAsync(rating);
+                return new RatingResponseModel(rating);
+            }
+            catch (Exception e)
+            {
+                return new RatingResponseModel(null, e.Message, true);
+            }
         }
 
         public async Task<long> DeleteRatingAsync(string ratingId)
@@ -27,49 +35,86 @@ namespace ReviewService.Repositories
             return result.DeletedCount;
         }
 
-        public async Task<Rating> GetRatingByIdAsync(string ratingId)
+        public async Task<RatingResponseModel> GetRatingByIdAsync(string ratingId)
         {
-            var result = await _context.Ratings.Find(r => r.Id == ratingId).FirstOrDefaultAsync();
-            return result;
-        }
-
-        public async Task<IEnumerable<Rating>> GetRatingsAsync()
-        {
-           var results =await _context.Ratings.Find(r=>true).ToListAsync();
-            return results;
-        }
-
-        public async Task<IEnumerable<Rating>> GetRatingsByUserIdAsync(string userId)
-        {
-           var result =await _context.Ratings.Find(r=>r.CreatingUser== userId).ToListAsync();
-            return result;
-        }
-
-        public async Task<IEnumerable<Rating>> GetRatingsForPostAsync(string postId)
-        {
-            var results =await _context.Ratings.Find(r=>r.ReferenceId==postId).ToListAsync();
-            return results;
-        }
-
-        public async Task<Rating> UpdateRatingAsync(RatingRequestModel rating)
-        {
-            var filter = Builders<Rating>.Filter.Eq(r => r.Id, rating.Id);
-            var update = Builders<Rating>.Update
-                .Set(r => r.rating, rating.rating)
-                .Set(r => r.CreatingUser, rating.CreatingUser)
-                .Set(r => r.CreatedDate, rating.CreatedDate)
-                .Set(r => r.ModifiedDate, DateTime.UtcNow.ToString())
-                .Set(r => r.ModifyingUser, rating.ModifyingUser)
-                .Set(r => r.ReferenceId, rating.ReferenceId)
-                .Set(r => r.Type, rating.Type)
-                .Set(r => r.State, rating.State);
-
-            var options = new FindOneAndUpdateOptions<Rating>
+            try
             {
-                ReturnDocument = ReturnDocument.After
-            };
+                var result = await _context.Ratings.Find(r => r.Id == ratingId).FirstOrDefaultAsync();
+                return new RatingResponseModel(result);
+            }
+            catch (Exception e)
+            {
+                return new RatingResponseModel(null, e.Message, true);
+            }
+        }
 
-            return await _context.Ratings.FindOneAndUpdateAsync(filter, update, options);
+        public async Task<IEnumerable<RatingResponseModel>> GetRatingsAsync()
+        {
+            try
+            {
+                var results = await _context.Ratings.Find(r => true).ToListAsync();
+                return results.Select(r => new RatingResponseModel(r));
+            }
+            catch (Exception e)
+            {
+                return new[] { new RatingResponseModel(null, e.Message, true) };
+            }
+        }
+
+        public async Task<IEnumerable<RatingResponseModel>> GetRatingsByUserIdAsync(string userId)
+        {
+            try
+            {
+                var result = await _context.Ratings.Find(r => r.CreatingUser == userId).ToListAsync();
+                return result.Select(r => new RatingResponseModel(r));
+            }
+            catch (Exception e)
+            {
+                return new[] { new RatingResponseModel(null, e.Message, true) };
+            }
+        }
+
+        public async Task<IEnumerable<RatingResponseModel>> GetRatingsForPostAsync(string postId)
+        {
+            try
+            {
+                var results = await _context.Ratings.Find(r => r.ReferenceId == postId).ToListAsync();
+                return results.Select(r => new RatingResponseModel(r));
+            }
+            catch (Exception e)
+            {
+                return new[] { new RatingResponseModel(null, e.Message, true) };
+            }
+        }
+
+        public async Task<RatingResponseModel> UpdateRatingAsync(RatingRequestModel rating)
+        {
+            try
+            {
+                var filter = Builders<Rating>.Filter.Eq(r => r.Id, rating.Id);
+                var update = Builders<Rating>.Update
+                    .Set(r => r.rating, rating.rating)
+                    .Set(r => r.CreatingUser, rating.CreatingUser)
+                    .Set(r => r.CreatedDate, rating.CreatedDate)
+                    .Set(r => r.ModifiedDate, DateTime.UtcNow.ToString())
+                    .Set(r => r.ModifyingUser, rating.ModifyingUser)
+                    .Set(r => r.ReferenceId, rating.ReferenceId)
+                    .Set(r => r.Type, rating.Type)
+                    .Set(r => r.State, rating.State);
+
+                var options = new FindOneAndUpdateOptions<Rating>
+                {
+                    ReturnDocument = ReturnDocument.After,
+                    IsUpsert = false
+                };
+
+                var result= await _context.Ratings.FindOneAndUpdateAsync(filter, update, options);
+                return new RatingResponseModel(result);
+            }
+            catch (Exception e)
+            {
+                return new RatingResponseModel(null, e.Message, true);
+            }
         }
 
     }
