@@ -16,5 +16,7 @@ namespace CommunicationService.Data
         }
 
         public IMongoCollection<ChatMessage> ChatMessages { get; }
+
+        public IMongoCollection<ChatRoom> ChatRooms { get; }
     }
 }

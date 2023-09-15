@@ -78,7 +78,7 @@ services:
     container_name: farmlink_chatmessagesdb
     restart: always
     ports:
-        - "27024:27017"
+        - "27025:27017"
     volumes:
          - "/var/lib/mongodb-farmlink-chats:/data/db"
     command: ["mongod", "--port", "27017"]

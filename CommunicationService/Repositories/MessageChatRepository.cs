@@ -1,7 +1,6 @@
 ﻿using CommunicationService.Data.Interfaces;
 using CommunicationService.Models;
 using CommunicationService.Repositories.Interfaces;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace CommunicationService.Repositories
