@@ -1,26 +1,26 @@
 ﻿using PromotionsService.Enumarations;
 using PromotionsService.Models.RequestModels;
-using PromotionsService.Models;
+using PromotionsService.Models.ResponseModels;
 
 namespace PromotionsService.Repositories.Interfaces
 {
 
     public interface IPromotionsRepository
     {
-        Task<Promotion> CreatePromotionAsync(PromotionRequestModel promotion);
+        Task<PromotionResponseModel> CreatePromotionAsync(PromotionRequestModel promotion);
 
-        Task<Promotion> GetPromotionByIdAsync(string promotionId);
+        Task<PromotionResponseModel> GetPromotionByIdAsync(string promotionId);
 
-        Task<IEnumerable<Promotion>> GetActivePromotionsAsync();
+        Task<IEnumerable<PromotionResponseModel>> GetActivePromotionsAsync();
 
-        Task<IEnumerable<Promotion>> GetPromotionsByTypeAsync(PromotionType type);
+        Task<IEnumerable<PromotionResponseModel>> GetPromotionsByTypeAsync(PromotionType type);
 
-        Task<IEnumerable<Promotion>> GetPromotionsByTargetAudienceAsync(PromotionTargetAudience targetAudience);
+        Task<IEnumerable<PromotionResponseModel>> GetPromotionsByTargetAudienceAsync(PromotionTargetAudience targetAudience);
 
-        Task<Promotion> UpdatePromotionAsync(PromotionRequestModel promotion);
+        Task<PromotionResponseModel> UpdatePromotionAsync(PromotionRequestModel promotion);
 
         Task<long> DeletePromotionAsync(string promotionId);
 
-        Task<IEnumerable<Promotion>> GetPromotionsAsync();
+        Task<IEnumerable<PromotionResponseModel>> GetPromotionsAsync();
     }
 }

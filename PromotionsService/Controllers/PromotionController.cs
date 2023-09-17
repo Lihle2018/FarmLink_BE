@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using PromotionsService.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using PromotionsService.Models.RequestModels;
 using PromotionsService.Models.ResponseModels;
 using PromotionsService.Repositories.Interfaces;
@@ -22,13 +20,13 @@ namespace PromotionsService.Controllers
         }
 
         [HttpPost("AddPromotion")]
-        [ProducesResponseType(typeof(PromotionResponseModel),(int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(PromotionResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<PromotionResponseModel>> AddPromotion(PromotionRequestModel Request)
         {
-            var result = await ExecuteWithLogging(async ()=>await _repository.CreatePromotionAsync(Request));
-            if (result.Data == null&&!result.Error)
+            var result = await ExecuteWithLogging(async () => await _repository.CreatePromotionAsync(Request));
+            if (result.Data == null && !result.Error)
                 return Unauthorized(result);
             if (result.Error)
                 return StatusCode(500, result);
@@ -118,50 +116,21 @@ namespace PromotionsService.Controllers
         }
 
         #region Helpers
-        private async Task<PromotionResponseModel> ExecuteWithLogging(Func<Task<Promotion>> action)
+        private async Task<PromotionResponseModel> ExecuteWithLogging(Func<Task<PromotionResponseModel>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
-            try
-            {
-                _logger.LogInformation("[BEGIN] " + logName);
-                var result = await action.Invoke();
-                if (result != null)
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return new PromotionResponseModel(result);
-                }
-                _logger.LogInformation("[END] " + logName);
-                return new PromotionResponseModel(result, $"{logName} operation failed.");
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("[END] " + logName);
-                return new PromotionResponseModel(null, e.Message, true);
-            }
+            _logger.LogInformation("[BEGIN] " + logName);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return result;
         }
-        private async Task<IEnumerable<PromotionResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<Promotion>>> action)
+        private async Task<IEnumerable<PromotionResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<PromotionResponseModel>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
-            try
-            {
-                _logger.LogInformation("[BEGIN] " + logName);
-                var result = await action.Invoke();
-                if (result != null)
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return result.Select(x => new PromotionResponseModel(x));
-                }
-                else
-                {
-                    _logger.LogInformation("[END] " + logName);
-                    return new[] { new PromotionResponseModel(null, $"{logName} operation failed.") };
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("[END] " + logName);
-                return new[] { new PromotionResponseModel(null, e.Message, true) };
-            }
+            _logger.LogInformation("[BEGIN] " + logName);
+            var result = await action.Invoke();
+            _logger.LogInformation("[END] " + logName);
+            return result;
         }
 
         private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)
