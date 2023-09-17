@@ -15,11 +15,18 @@ namespace OrderService.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<Order> AddOrderAsync(OrderRequestModel Request)
+        public async Task<OrderResponseModel> AddOrderAsync(OrderRequestModel Request)
         {
-            var order = new Order(Request);
-            await _context.Orders.InsertOneAsync(order);
-            return order;
+            try
+            {
+                var order = new Order(Request);
+                await _context.Orders.InsertOneAsync(order);
+                return new OrderResponseModel(order);
+            }
+            catch (Exception e)
+            {
+                return new OrderResponseModel(null, e.Message, true);
+            }
         }
 
         public async Task<long> DeleteOrderAsync(string Id)
@@ -29,45 +36,69 @@ namespace OrderService.Repositories
             return result.DeletedCount;
         }
 
-        public async Task<IEnumerable<Order>> GetOrdersAsync()
+        public async Task<IEnumerable<OrderResponseModel>> GetOrdersAsync()
         {
-            var orders = await _context.Orders.FindAsync(o => true);
-            return ExcludeDeletedOrders(orders.ToList());
-        }
-
-        public async Task<Order> GetOrderByAsync(string Id)
-        {
-            var result = await _context.Orders.FindAsync(o => o.Id == Id && o.State == State.Active);
-            return result.FirstOrDefault();
-        }
-
-        public async Task<Order> UpdateOrderAsync(OrderRequestModel request)
-        {
-            var filter = Builders<Order>.Filter.Eq(o => o.Id, request.Id);
-            var update = Builders<Order>.Update
-                .Set(o => o.CustomerId, request.CustomerId)
-                .Set(o => o.Items, request.Items)
-                .Set(o => o.CreatedAt, request.CreatedAt)
-                .Set(o => o.UpdatedAt, DateTime.UtcNow)
-                .Set(o => o.Status, request.Status)
-                .Set(o => o.TotalAmount, request.TotalAmount)
-                .Set(o => o.TaxAmount, request.TaxAmount)
-                .Set(o => o.DeliveryFee, request.DeliveryFee)
-                .Set(o => o.PaymentMethod, request.PaymentMethod)
-                .Set(o => o.PaymentTransactionId, request.PaymentTransactionId)
-                .Set(o => o.DeliveryNote, request.DeliveryNote)
-                .Set(o => o.DeliveryWindow, request.DeliveryWindow)
-                .Set(o => o.CancellationReason, request.CancellationReason)
-                .Set(o => o.RefundAmount, request.RefundAmount)
-                .Set(o => o.VendorId, request.VendorId)
-                .Set(o => o.State, request.State);
-
-            var options = new FindOneAndUpdateOptions<Order>
+            try
             {
-                ReturnDocument = ReturnDocument.After
-            };
+                var orders = await _context.Orders.FindAsync(o => true);
+                var result= ExcludeDeletedOrders(orders.ToList());
+                return result.Select(o => new OrderResponseModel(o));
+            }
+            catch (Exception e)
+            {
+                return new[] { new OrderResponseModel(null, e.Message, true) };
+            }
+        }
 
-            return await _context.Orders.FindOneAndUpdateAsync(filter, update, options);
+        public async Task<OrderResponseModel> GetOrderByAsync(string Id)
+        {
+            try
+            {
+                var result = await _context.Orders.FindAsync(o => o.Id == Id && o.State == State.Active);
+                return new OrderResponseModel(result.FirstOrDefault());
+            }
+            catch (Exception e)
+            {
+                return new OrderResponseModel(null, e.Message, true);
+            }
+        }
+
+        public async Task<OrderResponseModel> UpdateOrderAsync(OrderRequestModel request)
+        {
+            try
+            {
+                var filter = Builders<Order>.Filter.Eq(o => o.Id, request.Id);
+                var update = Builders<Order>.Update
+                    .Set(o => o.CustomerId, request.CustomerId)
+                    .Set(o => o.Items, request.Items)
+                    .Set(o => o.CreatedAt, request.CreatedAt)
+                    .Set(o => o.UpdatedAt, DateTime.UtcNow)
+                    .Set(o => o.Status, request.Status)
+                    .Set(o => o.TotalAmount, request.TotalAmount)
+                    .Set(o => o.TaxAmount, request.TaxAmount)
+                    .Set(o => o.DeliveryFee, request.DeliveryFee)
+                    .Set(o => o.PaymentMethod, request.PaymentMethod)
+                    .Set(o => o.PaymentTransactionId, request.PaymentTransactionId)
+                    .Set(o => o.DeliveryNote, request.DeliveryNote)
+                    .Set(o => o.DeliveryWindow, request.DeliveryWindow)
+                    .Set(o => o.CancellationReason, request.CancellationReason)
+                    .Set(o => o.RefundAmount, request.RefundAmount)
+                    .Set(o => o.VendorId, request.VendorId)
+                    .Set(o => o.State, request.State);
+
+                var options = new FindOneAndUpdateOptions<Order>
+                {
+                    ReturnDocument = ReturnDocument.After,
+                    IsUpsert = false
+                };
+
+                var result= await _context.Orders.FindOneAndUpdateAsync(filter, update, options);
+                return new OrderResponseModel(result);
+            }
+            catch (Exception e)
+            {
+                return new OrderResponseModel(null, e.Message, true);
+            }
         }
 
         public async Task<long> SoftDeleteOrderAsync(string id)
