@@ -2,6 +2,7 @@
 using ProductService.Data.Interfaces;
 using ProductService.Models;
 using ProductService.Models.RequestModels;
+using ProductService.Models.ResponseModels;
 using ProductService.Repositories.Interfaces;
 
 namespace ProductService.Repositories
@@ -13,11 +14,19 @@ namespace ProductService.Repositories
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
-        public async Task<Category> CreateCategoryAsync(CategoryRequestModel Request)
+
+        public async Task<CategoryResponseModel> CreateCategoryAsync(CategoryRequestModel Request)
         {
-            var category = new Category(Request);
-            await _context.Categories.InsertOneAsync(category);
-            return category;
+            try
+            {
+                var category = new Category(Request);
+                await _context.Categories.InsertOneAsync(category);
+                return new CategoryResponseModel(category);
+            }
+            catch (Exception e)
+            {
+                return new CategoryResponseModel(null, e.Message, true);
+            }
         }
 
         public async Task<long> DeleteCategoryAsync(string categoryId)
@@ -26,37 +35,60 @@ namespace ProductService.Repositories
             return result.DeletedCount;
         }
 
-        public async Task<IEnumerable<Category>> GetCategoriesAsync()
+        public async Task<IEnumerable<CategoryResponseModel>> GetCategoriesAsync()
         {
-            var results =await _context.Categories.FindAsync(c => true);
-            return results.ToEnumerable();
-        }
-
-        public async Task<Category> GetCategoryAsync(string categoryId)
-        {
-            var results = await _context.Categories.FindAsync(c =>c.Id==categoryId);
-            return results.FirstOrDefault();
-        }
-
-        public async Task<Category> UpdateCategoryAsync(CategoryRequestModel category)
-        {
-            var filter = Builders<Category>.Filter.Eq(c => c.Id, category.Id);
-            var update = Builders<Category>.Update
-                .Set(c => c.Name, category.Name)
-                .Set(c => c.Description, category.Description)
-                .Set(c => c.ModifyingUser, category.ModifyingUser)
-                .Set(c => c.ModifiedDate, DateTime.UtcNow)
-                .Set(c => c.CreatedDate, category.CreatedDate)
-                .Set(c => c.CreatingUser, category.CreatingUser);
-
-            var options = new FindOneAndUpdateOptions<Category>
+            try
             {
-                ReturnDocument = ReturnDocument.After
-            };
 
-            var updatedCategory = await _context.Categories.FindOneAndUpdateAsync(filter, update, options);
+                var results = await _context.Categories.Find(c => true).ToListAsync();
+                return results.Select(c=>new CategoryResponseModel(c));
+            }
+            catch (Exception e)
+            {
+                return new[] {new CategoryResponseModel(null,e.Message, true)};
+            }
+        }
 
-            return updatedCategory;
+        public async Task<CategoryResponseModel> GetCategoryAsync(string categoryId)
+        {
+            try
+            {
+                var results = await _context.Categories.FindAsync(c => c.Id == categoryId);
+                return new CategoryResponseModel(results.FirstOrDefault());
+            }
+            catch (Exception e)
+            {
+                return new CategoryResponseModel(null, e.Message, true);
+            }
+        }
+
+        public async Task<CategoryResponseModel> UpdateCategoryAsync(CategoryRequestModel category)
+        {
+            try
+            {
+                var filter = Builders<Category>.Filter.Eq(c => c.Id, category.Id);
+                var update = Builders<Category>.Update
+                    .Set(c => c.Name, category.Name)
+                    .Set(c => c.Description, category.Description)
+                    .Set(c => c.ModifyingUser, category.ModifyingUser)
+                    .Set(c => c.ModifiedDate, DateTime.UtcNow)
+                    .Set(c => c.CreatedDate, category.CreatedDate)
+                    .Set(c => c.CreatingUser, category.CreatingUser);
+
+                var options = new FindOneAndUpdateOptions<Category>
+                {
+                    ReturnDocument = ReturnDocument.After,
+                    IsUpsert = false
+                };
+
+                var updatedCategory = await _context.Categories.FindOneAndUpdateAsync(filter, update, options);
+
+                return new CategoryResponseModel(updatedCategory);
+            }
+            catch (Exception e)
+            {
+                return new CategoryResponseModel(null, e.Message, true);
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProductService.Models;
 using ProductService.Models.RequestModels;
 using ProductService.Models.ResponseModels;
 using ProductService.Repositories.Interfaces;
@@ -22,17 +21,29 @@ namespace ProductService.Controllers
 
         [HttpPost("AddProduct")]
         [ProducesResponseType(typeof(ProductResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<ActionResult<ProductResponseModel>> CreateProduct(ProductRequestModel Request)
         {
             var result = await ExecuteWithLogging(() => _repository.CreateProductAsync(Request));
+            if (result.Data == null && !result.Error)
+                return Unauthorized(result);
+            if (result.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
 
         [HttpPut("UpdateProduct")]
         [ProducesResponseType(typeof(ProductResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<ProductResponseModel>> UpdateProduct(ProductRequestModel Request)
         {
             var result = await ExecuteWithLogging(() => _repository.UpdateProductAsync(Request));
+            if (result.Data == null && !result.Error)
+                return NotFound(result);
+            if (result.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
 
@@ -48,78 +59,79 @@ namespace ProductService.Controllers
         [HttpGet("GetProduct")]
         [ProducesResponseType(typeof(ProductResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ProductResponseModel>> GetProduct(string Id)
         {
             var result = await ExecuteWithLogging(() => _repository.GetProductByIdAsync(Id));
-            if (result.Data == null)
-            {
-                _logger.LogError($"Product with Id: {Id} is not found");
-                return NotFound();
-            }
-            {
-                return Ok(result);
-            }
+            if (result.Data == null && !result.Error)
+                return NotFound(result);
+            if (result.Error)
+                return StatusCode(500, result);
+            return Ok(result);
         }
 
         [HttpGet("GetProducts")]
         [ProducesResponseType(typeof(IEnumerable<ProductResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<IEnumerable<ProductResponseModel>>> GetProducts()
         {
             var result = await ExecuteWithLogging(() => _repository.GetProductsAsync());
-            if (result == null)
-            {
-                _logger.LogError("Products not found");
-                return NotFound();
-            }
+            var first = result.FirstOrDefault();
+            if (first.Data == null && !first.Error)
+                return NotFound(result);
+            if (first.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
 
         [HttpGet("GetProductsByCategory")]
         [ProducesResponseType(typeof(IEnumerable<ProductResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<IEnumerable<ProductResponseModel>>> GetProductsByCategory(string CategoryId)
         {
             var result = await ExecuteWithLogging(() => _repository.GetProductsByCategoryAsync(CategoryId));
-            if (result == null)
-            {
-                _logger.LogError($"No products under the category Id: {CategoryId}  found");
-                return NotFound();
-            }
+            var first = result.FirstOrDefault();
+            if (first.Data == null && !first.Error)
+                return NotFound(result);
+            if (first.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
 
         [HttpGet("SearchProducts")]
         [ProducesResponseType(typeof(IEnumerable<ProductResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<IEnumerable<ProductResponseModel>>> SearchProducts(string searchString)
         {
             var result = await ExecuteWithLogging(() => _repository.SearchProductsAsync(searchString));
-            if (result == null)
-            {
-                _logger.LogError($"The search string {searchString} did not match any product");
-                return NotFound();
-            }
+            var first = result.FirstOrDefault();
+            if (first.Data == null && !first.Error)
+                return NotFound(result);
+            if (first.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
 
         #region Helpers
-        private async Task<ProductResponseModel> ExecuteWithLogging(Func<Task<Product>> action)
+        private async Task<ProductResponseModel> ExecuteWithLogging(Func<Task<ProductResponseModel>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
             var result = await action.Invoke();
             _logger.LogInformation("[END] " + logName);
-            return new ProductResponseModel(result);
+            return result;
         }
 
-        private async Task<IEnumerable<ProductResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<Product>>> action)
+        private async Task<IEnumerable<ProductResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<ProductResponseModel>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
             var result = await action.Invoke();
             _logger.LogInformation("[END] " + logName);
-            return result.Select(x => new ProductResponseModel(x));
+            return result;
         }
 
         private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)
