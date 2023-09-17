@@ -1,4 +1,5 @@
-﻿using InventoryService.Models;
+﻿using Amazon.Runtime.Internal.Transform;
+using InventoryService.Models;
 using InventoryService.Models.RequestModels;
 using InventoryService.Models.ResponseModels;
 using InventoryService.Repositories.Interfaces;
@@ -23,17 +24,30 @@ namespace InventoryService.Controllers
 
         [HttpPost("AddItem")]
         [ProducesResponseType(typeof(InventoryItemResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<InventoryItemResponseModel>> AddItem(InventoryItemRequestModel Request)
         {
             var result =await ExecuteWithLogging(()=>_repository.AddInventoryItemAsync(Request));
+            if (result.Data == null && !result.Error)
+                return NotFound(result);
+            if (result.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
 
         [HttpPut("UpdateItem")]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(InventoryItemResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+
         public async Task<ActionResult<InventoryItemResponseModel>> UpdateItem(InventoryItemRequestModel Request)
         {
             var result = await ExecuteWithLogging(() => _repository.UpdateInventoryItemAsync(Request));
+            if (result.Data == null && !result.Error)
+                return NotFound(result);
+            if (result.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
 
@@ -47,56 +61,51 @@ namespace InventoryService.Controllers
         }
 
         [HttpGet("GetItem")]
-        [ProducesResponseType(typeof(InventoryItemResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(InventoryItemResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<InventoryItemResponseModel>> GetItem(string Id)
         {
             var result =await ExecuteWithLogging(()=>_repository.GetInventoryItemByIdAsync(Id));
-            if(result == null)
-            {
-                _logger.LogError($"No item found with Id: {Id}");
-                return NotFound();
-            }
-            else
-            {
-                return Ok(result);
-            }
+            if (result.Data == null && !result.Error)
+                return NotFound(result);
+            if (result.Error)
+                return StatusCode(500, result);
+            return Ok(result);
         }
 
         [HttpGet("GetItems")]
-        [ProducesResponseType(typeof(IEnumerable<InventoryItemResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(InventoryItemResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<IEnumerable<InventoryItemResponseModel>>> GetItems()
         {
             var result = await ExecuteWithLogging(() => _repository.GetInventoryItemsAsync());
-            if (result == null)
-            {
-                _logger.LogError("No items found");
-                return NotFound();
-            }
-            else
-            {
-                return Ok(result);
-            }
+            var first = result.FirstOrDefault();
+            if (first.Data == null && !first.Error)
+                return NotFound(result);
+            if (first.Error)
+                return StatusCode(500, result);
+            return Ok(result);
         }
 
         #region Helpers
-        private async Task<InventoryItemResponseModel> ExecuteWithLogging(Func<Task<InventoryItem>> action)
+        private async Task<InventoryItemResponseModel> ExecuteWithLogging(Func<Task<InventoryItemResponseModel>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
             var result = await action.Invoke();
             _logger.LogInformation("[END] " + logName);
-            return new InventoryItemResponseModel(result);
+            return result;
         }
 
-        private async Task<IEnumerable<InventoryItemResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<InventoryItem>>> action)
+        private async Task<IEnumerable<InventoryItemResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<InventoryItemResponseModel>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
             var result = await action.Invoke();
             _logger.LogInformation("[END] " + logName);
-            return result.Select(x => new InventoryItemResponseModel(x));
+            return result;
         }
 
         private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)
