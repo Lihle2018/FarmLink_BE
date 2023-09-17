@@ -24,13 +24,13 @@ namespace InventoryService.Controllers
 
         [HttpPost("AddItem")]
         [ProducesResponseType(typeof(InventoryItemResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<InventoryItemResponseModel>> AddItem(InventoryItemRequestModel Request)
         {
             var result =await ExecuteWithLogging(()=>_repository.AddInventoryItemAsync(Request));
             if (result.Data == null && !result.Error)
-                return NotFound(result);
+                return Unauthorized(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);
@@ -76,7 +76,7 @@ namespace InventoryService.Controllers
 
         [HttpGet("GetItems")]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(InventoryItemResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<InventoryItemResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<IEnumerable<InventoryItemResponseModel>>> GetItems()
         {
