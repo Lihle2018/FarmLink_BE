@@ -1,16 +1,16 @@
 ﻿using FarmLink.CustomerService.Models.RequestModels;
-using FarmLink.CustomerService.Models;
+using FarmLink.CustomerService.Models.ResponseModels;
 
 namespace CustomerService.Repositories.Interfaces
 {
     public interface ICustomerRepository
     {
-        Task<Customer> AddCustomerAsync(CustomerRequestModel Request);
-        Task<Customer> UpdateCustomerAsync(CustomerRequestModel Request);
+        Task<CustomerResponseModel> AddCustomerAsync(CustomerRequestModel Request);
+        Task<CustomerResponseModel> UpdateCustomerAsync(CustomerRequestModel Request);
         Task<long> DeleteCustomerAsync(string Id);
         Task<long> SoftDeleteCustomerAsync(string Id);
-        Task<Customer> GetCustomerAsync(string Id);
-        Task<IEnumerable<Customer>> GetCustomersAsync();
+        Task<CustomerResponseModel> GetCustomerAsync(string Id);
+        Task<IEnumerable<CustomerResponseModel>> GetCustomersAsync();
 
     }
 }

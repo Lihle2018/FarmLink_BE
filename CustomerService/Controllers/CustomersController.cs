@@ -20,43 +20,66 @@ namespace CustomerService.Controllers
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
+
         [HttpPost("AddCustomer")]
         [ProducesResponseType(typeof(CustomerResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<CustomerResponseModel>> AddCustomer(CustomerRequestModel Request)
         {
             var result = await ExecuteWithLogging(() => _repository.AddCustomerAsync(Request));
+            if (result.Data == null && !result.Error)
+                return Unauthorized(result);
+            if (result.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
 
         [HttpGet("GetCustomer")]
         [ProducesResponseType(typeof(CustomerResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<CustomerResponseModel>> GetCustomer(string Id)
         {
             var result = await ExecuteWithLogging(() => _repository.GetCustomerAsync(Id));
-            if (result == null)
+            if (result.Data == null&&!result.Error)
             {
-                _logger.LogError($"Cutomer with ID: {Id} is not found");
-                return NotFound();
+                return NotFound(result);
             }
+            if(result.Error)
+                return StatusCode(500, result);
             else
             {
                 return Ok(result);
             }
         }
+
         [HttpGet("GetCustomers")]
         [ProducesResponseType(typeof(IEnumerable<CustomerResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<IEnumerable<CustomerResponseModel>>> GetCustomers()
         {
             var result = await ExecuteWithLogging(() => _repository.GetCustomersAsync());
+            var first = result.FirstOrDefault();
+            if (first.Data == null&&!first.Error)
+                return NotFound(result);
+            if (first.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
 
         [HttpPut("UpdateCustomer")]
         [ProducesResponseType(typeof(CustomerResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<CustomerResponseModel>> UpdateCustomer(CustomerRequestModel Request)
         {
             var result = await ExecuteWithLogging(() => _repository.UpdateCustomerAsync(Request));
+            if(result.Data==null&&!result.Error)
+                return NotFound(result);
+            if (result.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
 
@@ -72,28 +95,29 @@ namespace CustomerService.Controllers
         [HttpDelete("DeleteCustomer")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InsufficientStorage)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> DeleteCustomer(string Id)
         {
             return await ExecuteActionAsync(() => _repository.DeleteCustomerAsync(Id));
         }
+
         #region Helpers
-        private async Task<CustomerResponseModel> ExecuteWithLogging(Func<Task<Customer>> action)
+        private async Task<CustomerResponseModel> ExecuteWithLogging(Func<Task<CustomerResponseModel>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
             var result = await action.Invoke();
             _logger.LogInformation("[END] " + logName);
-            return new CustomerResponseModel(result);
+            return result;
         }
 
-        private async Task<IEnumerable<CustomerResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<Customer>>> action)
+        private async Task<IEnumerable<CustomerResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<CustomerResponseModel>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
             var result = await action.Invoke();
             _logger.LogInformation("[END] " + logName);
-            return result.Select(x => new CustomerResponseModel(x));
+            return result;
         }
 
         private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)
