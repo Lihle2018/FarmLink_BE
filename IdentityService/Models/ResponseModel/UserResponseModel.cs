@@ -4,7 +4,7 @@ namespace FarmLink.IndentityService.Models.RequestModels
 {
     public class UserResponseModel:ResponseBase<User>
     {
-        public UserResponseModel(User user,string message=null)
+        public UserResponseModel(User user,string message=null,bool error=false)
         {
            
             if(user!=null)
@@ -15,6 +15,7 @@ namespace FarmLink.IndentityService.Models.RequestModels
                 Data = user;
             }   
             Message = message;
+            Error = error;
         }
     }
 }

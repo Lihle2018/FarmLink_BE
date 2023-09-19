@@ -1,5 +1,4 @@
-﻿using FarmLink.IndentityService.Models;
-using FarmLink.IndentityService.Models.RequestModels;
+﻿using FarmLink.IndentityService.Models.RequestModels;
 using FarmLink.Shared.Enumarations;
 using FarmLink.Shared.Services;
 using IdentityService.Extensions;
@@ -28,8 +27,10 @@ namespace IdentityService.Controllers
         }
 
         [HttpPost("AddUser")]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult> CreateUserAsync(UserRequestModel user)
+        public async Task<ActionResult<UserResponseModel>> CreateUserAsync(UserRequestModel user)
         {
             var result = await ExecuteWithLogging(async () =>
             {
@@ -47,31 +48,40 @@ namespace IdentityService.Controllers
                 await _emailService.SendEmail(user.Email, subject, body);
                 return newUser;
             });
+            if (result.Data == null && !result.Error)
+                return Unauthorized(result);
+            if (result.Error)
+                return StatusCode(500, result);
             return Ok(result);
         }
+
         [HttpPost("Login")]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Login(LoginRequestModel model)
+        public async Task<ActionResult<UserResponseModel>> Login(LoginRequestModel model)
         {
             var user = await _repository.GetUserByEmailAsync(model.Email);
-            if (user == null)
+            if (user.Data == null&&!user.Error)
             {
-                return NotFound();
+                return NotFound(user);
+            }
+            if(user.Error)
+            {
+                return StatusCode(500, user); 
             }
             else
             {
-                if (user.UserState == State.Inactive)
+                if (user.Data.UserState == State.Inactive)
                 {
-                    return Unauthorized("The user account is inactive. Please verify your email or call support");
+                    return Unauthorized(user);
                 }
                 else
                 {
-                    model.Password = _hashingService.HashPassword(model.Password, user.Salt);
+                    model.Password = _hashingService.HashPassword(model.Password, user.Data.Salt);
                     var result =await ExecuteWithLogging(()=> _repository.LoginAsync(model));
                     if(result==null)
-                        return NotFound("Password or email is incorrect");
+                        return NotFound(user);
                   return Ok(result);
                 }
             }
@@ -92,7 +102,7 @@ namespace IdentityService.Controllers
             }
             else
             {
-                if (user.UserState == State.Inactive)
+                if (user.Data.UserState == State.Inactive)
                 {
                     return Unauthorized("Your account is inactive. Call support to activate your account");
                 }
@@ -105,10 +115,10 @@ namespace IdentityService.Controllers
                         $"Best regards," +
                         $"\nX-Labs-24 solutions";
                     await _emailService.SendEmail(Email, subject, body);
-                    var result = await _repository.UpdateUserOtpAsync(user);
+                    var result = await _repository.UpdateUserOtpAsync(user.Data);
                     if (result == 1)
                     {
-                        return Ok(new UserResponseModel(user));
+                        return Ok(user);
                     }
                     return StatusCode(500, "Something went wrong");
                 }
@@ -116,21 +126,21 @@ namespace IdentityService.Controllers
         }
         [HttpPost("VerifyOtpAndActivateUser")]
         [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<UserResponseModel>> VerifyOtpAndActivateUser(VerifyOtpRequestModel request)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
 
-            User user = await _repository.GetUserByIdAsync(request.UserId);
-            if (user != null)
+            var user = await _repository.GetUserByIdAsync(request.UserId);
+            if (user.Data != null)
             {
-                if (user.Otp == request.Otp)
+                if (user.Data.Otp == request.Otp)
                 {
-                    user.UserState = State.Active;
-                    user.IsEmailVerified = true;
-                    var result = await ExecuteWithLogging(async () => await _repository.UpdateUserAsync(user));
+                    user.Data.UserState = State.Active;
+                    user.Data.IsEmailVerified = true;
+                    var result = await ExecuteWithLogging(async () => await _repository.UpdateUserAsync(user.Data));
 
                     return Ok(result);
                 }
@@ -141,7 +151,7 @@ namespace IdentityService.Controllers
             }
             else
             {
-                return Unauthorized("The user is not found");
+                return NotFound("The user is not found");
             }
         }
 
@@ -149,12 +159,13 @@ namespace IdentityService.Controllers
         [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> UpdatePassword(UpdatePasswordRequest Request)
+        public async Task<ActionResult<UserResponseModel>> UpdatePassword(UpdatePasswordRequest Request)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
 
-            var user = await _repository.GetUserByEmailAsync(Request.Email);
+            var result = await _repository.GetUserByEmailAsync(Request.Email);
+            var user = result.Data;
             if (user != null)
             {
                 if (user.Otp == Request.Otp)
@@ -162,9 +173,9 @@ namespace IdentityService.Controllers
                     var hash = _hashingService.GenerateSaltAndHash(Request.Password);
                     user.Password = hash.Hash;
                     user.Salt = hash.Salt;
-                    var result = await ExecuteWithLogging(async () => await _repository.UpdateUserPasswordAsync(user));
+                    var update = await ExecuteWithLogging(async () => await _repository.UpdateUserPasswordAsync(user));
 
-                    return Ok(result);
+                    return Ok(update);
                 }
                 else
                 {
@@ -173,15 +184,22 @@ namespace IdentityService.Controllers
             }
             else
             {
-                return Unauthorized("The user does not exist");
+                return NotFound("The user does not exist");
             }
         }
 
         [HttpGet("GetAllUsers")]
         [ProducesResponseType(typeof(IEnumerable<UserResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<IEnumerable<UserResponseModel>>> GetAllUsers()
         {
             var result = await ExecuteWithLogging(() => _repository.GetUsersAsync());
+            var first = result.FirstOrDefault();
+            if (first.Data == null && !first.Error)
+                return NotFound(result);
+            if (first.Error)
+                return StatusCode(500, result);
            return Ok(result);
         }
 
@@ -233,25 +251,25 @@ namespace IdentityService.Controllers
 
 
         #region Helpers
-        private async Task<UserResponseModel> ExecuteWithLogging(Func<Task<User>> action)
+        private async Task<UserResponseModel> ExecuteWithLogging(Func<Task<UserResponseModel>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
             var result = await action.Invoke();
             _logger.LogInformation("[END] " + logName);
-            return new UserResponseModel(result);
+            return result;
         }
 
-        private async Task<IEnumerable<UserResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<User>>> action)
+        private async Task<IEnumerable<UserResponseModel>> ExecuteWithLogging(Func<Task<IEnumerable<UserResponseModel>>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
             var result = await action.Invoke();
             _logger.LogInformation("[END] " + logName);
-            return result.Select(x => new UserResponseModel(x));
+            return result;
         }
 
-        private async Task<ActionResult> ExecuteActionAsync(Func<Task<long>> action)
+        private async Task<ActionResult<UserResponseModel>> ExecuteActionAsync(Func<Task<long>> action)
         {
             var logName = MethodBase.GetCurrentMethod()?.Name;
             _logger.LogInformation("[BEGIN] " + logName);
