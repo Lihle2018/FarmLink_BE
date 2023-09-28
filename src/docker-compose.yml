@@ -1,0 +1,97 @@
+version: '3.4'
+
+
+services:
+  vendorsdb:
+     image: mongo
+
+  productsdb:
+     image: mongo
+
+  ordersdb:
+     image: mongo
+
+  customersdb:
+     image: mongo
+
+  usersdb:
+     image: mongo
+  
+  promotionsdb:
+     image: mongo
+  
+  reviewsdb:
+     image: mongo
+
+  inventorydb:
+     image: mongo
+  
+  chatmessagesdb:
+     image: mongo
+
+  redis_cachedb:
+    image: redis:alpine
+  
+  customerservice:
+    image: ${DOCKER_REGISTRY-}customerservice
+    build:
+      context: .
+      dockerfile: CustomerService/Dockerfile
+   
+  identityservice:
+    image: ${DOCKER_REGISTRY-}identityservice
+    build:
+      context: .
+      dockerfile: IdentityService/Dockerfile
+
+
+  inventoryservice:
+    image: ${DOCKER_REGISTRY-}inventoryservice
+    build:
+      context: .
+      dockerfile: InventoryService/Dockerfile
+
+
+  orderservice:
+    image: ${DOCKER_REGISTRY-}orderservice
+    build:
+      context: .
+      dockerfile: OrderService/Dockerfile
+
+
+  productservice:
+    image: ${DOCKER_REGISTRY-}productservice
+    build:
+      context: .
+      dockerfile: ProductService/Dockerfile
+
+
+  reviewservice:
+    image: ${DOCKER_REGISTRY-}reviewservice
+    build:
+      context: .
+      dockerfile: ReviewService/Dockerfile
+
+
+  promotionsservice:
+    image: ${DOCKER_REGISTRY-}promotionsservice
+    build:
+      context: .
+      dockerfile: PromotionsService/Dockerfile
+
+
+  communicationservice:
+    image: ${DOCKER_REGISTRY-}communicationservice
+    build:
+      context: .
+      dockerfile: CommunicationService/Dockerfile
+
+
+  vendorservice:
+    image: ${DOCKER_REGISTRY-}vendorservice
+    build:
+      context: .
+      dockerfile: VendorService/Dockerfile
+volumes:
+  mongo_data:
+

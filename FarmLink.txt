@@ -1,0 +1,78 @@
+FarmLink
+│
+├── IdentityService (Microservice)
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── OrderService (Microservice)
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── ProductService (Microservice)
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── CustomerService (Microservice)
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── NotificationService (Microservice)
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── PaymentService (Microservice)
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── InventoryService (Microservice)
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── AnalyticsService (Microservice)
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── TaggingService (Microservice)  // Additional Microservice
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── ReviewService (Microservice)   // Additional Microservice
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── Common
+│   ├── Shared DTOs
+│   ├── Shared Interfaces
+│   ├── Shared Models
+│   ├── Shared Enums
+│   ├── ...
+│
+├── API Gateway (Optional)
+│   ├── Controllers
+│   ├── Services
+│   ├── ...
+│
+├── Infrastructure
+│   ├── Persistence (Database Contexts)
+│   ├── Data Repositories (For each Microservice)
+│   ├── ...
+│
+├── Docker (Containerization Configurations)
+│
+├── Configuration (Configuration Files)
+│
+├── Tests (Test Projects for Each Microservice)
+│
+├── Documentation (API Documentation, Architecture Details)
+│
+└── ...
