@@ -130,3 +130,7 @@ C:\FarmLink\tests\CommunicationService.Tests\obj\Debug\net6.0\refint\Communicati
 C:\FarmLink\tests\CommunicationService.Tests\obj\Debug\net6.0\CommunicationService.Tests.pdb
 C:\FarmLink\tests\CommunicationService.Tests\obj\Debug\net6.0\CommunicationService.Tests.genruntimeconfig.cache
 C:\FarmLink\tests\CommunicationService.Tests\obj\Debug\net6.0\ref\CommunicationService.Tests.dll
+C:\FarmLink\tests\CommunicationService.Tests\bin\Debug\net6.0\AutoFixture.dll
+C:\FarmLink\tests\CommunicationService.Tests\bin\Debug\net6.0\Castle.Core.dll
+C:\FarmLink\tests\CommunicationService.Tests\bin\Debug\net6.0\Fare.dll
+C:\FarmLink\tests\CommunicationService.Tests\bin\Debug\net6.0\Moq.dll

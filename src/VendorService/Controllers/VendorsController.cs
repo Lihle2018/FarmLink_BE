@@ -21,16 +21,21 @@ namespace VendorService.Controllers
 
         [HttpPost("AddVendor")]
         [ProducesResponseType(typeof(VendorResponseModel), ((int)HttpStatusCode.OK))]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<VendorResponseModel>> AddVendor(VendorRequestModel Request)
         {
-            var result = await ExecuteWithLogging(async () => await _repository.CreateVendorAsync(Request));
-            if (result.Data == null && !result.Error)
-                return Unauthorized(result);
-            if (result.Error)
-                return StatusCode(500, result);
-            return Ok(result);
+            if (Request == null)
+                return BadRequest(Request);
+            else
+            {
+                var result = await ExecuteWithLogging(async () => await _repository.CreateVendorAsync(Request));
+                if (result.Data == null && !result.Error)
+                    return BadRequest(result);
+                if (result.Error)
+                    return StatusCode(500, result);
+                return Ok(result);
+            }  
         }
 
         [HttpPut("UpdateVendor")]
@@ -43,7 +48,7 @@ namespace VendorService.Controllers
             if (result.Data == null && !result.Error)
                 return NotFound(result);
             if (result.Error)
-                return StatusCode(500, result);
+                return StatusCode(500,result);
             return Ok(result);
         }
 
