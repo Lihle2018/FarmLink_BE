@@ -9,11 +9,11 @@ namespace PromotionsService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PromotionController : ControllerBase
+    public class PromotionsController : ControllerBase
     {
-        private readonly ILogger<PromotionController> _logger;
+        private readonly ILogger<PromotionsController> _logger;
         private readonly IPromotionsRepository _repository;
-        public PromotionController(ILogger<PromotionController> logger, IPromotionsRepository repository)
+        public PromotionsController(ILogger<PromotionsController> logger, IPromotionsRepository repository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
@@ -21,13 +21,13 @@ namespace PromotionsService.Controllers
 
         [HttpPost("AddPromotion")]
         [ProducesResponseType(typeof(PromotionResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<PromotionResponseModel>> AddPromotion(PromotionRequestModel Request)
         {
             var result = await ExecuteWithLogging(async () => await _repository.CreatePromotionAsync(Request));
             if (result.Data == null && !result.Error)
-                return Unauthorized(result);
+                return BadRequest(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);
@@ -35,13 +35,13 @@ namespace PromotionsService.Controllers
 
         [HttpPut("UpdatePromotion")]
         [ProducesResponseType(typeof(PromotionResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<PromotionResponseModel>> UpdatePromotion(PromotionRequestModel Request)
         {
             var result = await ExecuteWithLogging(async () => await _repository.UpdatePromotionAsync(Request));
             if (result.Data == null && !result.Error)
-                return Unauthorized(result);
+                return BadRequest(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);
@@ -49,7 +49,7 @@ namespace PromotionsService.Controllers
 
         [HttpDelete("DeletePromotion")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> DeletePromotion(string id)
         {
@@ -104,7 +104,7 @@ namespace PromotionsService.Controllers
         [ProducesResponseType(typeof(IEnumerable<PromotionResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<IEnumerable<PromotionResponseModel>>> GetPromotionsByType(PromotionsByTypeTypeRequestModel Request)
+        public async Task<ActionResult<IEnumerable<PromotionResponseModel>>> GetPromotionsByType(PromotionsByTypeRequestModel Request)
         {
             var result = await ExecuteWithLogging(async () => await _repository.GetPromotionsByTypeAsync(Request.PromotionType));
             var first = result.FirstOrDefault();

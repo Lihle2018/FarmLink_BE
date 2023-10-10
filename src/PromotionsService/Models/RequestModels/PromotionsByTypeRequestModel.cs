@@ -2,7 +2,7 @@
 
 namespace PromotionsService.Models.RequestModels
 {
-    public class PromotionsByTypeTypeRequestModel
+    public class PromotionsByTypeRequestModel
     {
         public PromotionType PromotionType { get; set; }
     }
