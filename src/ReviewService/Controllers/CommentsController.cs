@@ -21,13 +21,13 @@ namespace ReviewService.Controllers
 
         [HttpPost("AddComment")]
         [ProducesResponseType(typeof(CommentResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<CommentResponseModel>> AddComment(CommentRequestModel Request)
         {
             var result = await ExecuteWithLogging(async () => await _repository.AddCommentAsync(Request));
             if (result.Data == null && !result.Error)
-                return Unauthorized(result);
+                return BadRequest(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);
@@ -41,7 +41,7 @@ namespace ReviewService.Controllers
         {
             var result = await ExecuteWithLogging(async () => await _repository.UpdateCommentAsync(Request));
             if (result.Data == null && !result.Error)
-                return Unauthorized(result);
+                return BadRequest(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);
@@ -63,7 +63,7 @@ namespace ReviewService.Controllers
 
         [HttpGet("GetComments")]
         [ProducesResponseType(typeof(IEnumerable<CommentResponseModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<IEnumerable<CommentResponseModel>>> GetComments()
         {
@@ -93,9 +93,9 @@ namespace ReviewService.Controllers
 
         [HttpGet("GetCommentsByPostId")]
         [ProducesResponseType(typeof(IEnumerable<CommentResponseModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<IEnumerable<CommentResponseModel>>> GetComments(string postId)
+        public async Task<ActionResult<IEnumerable<CommentResponseModel>>> GetCommentsByPostId(string postId)
         {
             var result = await ExecuteWithLogging(async () => await _repository.GetCommentsForPostAsync(postId));
             var first = result.FirstOrDefault();

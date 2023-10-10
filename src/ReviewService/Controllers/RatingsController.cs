@@ -20,13 +20,13 @@ namespace ReviewService.Controllers
 
         [HttpPost("AddRating")]
         [ProducesResponseType(typeof(RatingResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<RatingResponseModel>> AddRating(RatingRequestModel Request)
         {
             var result = await ExecuteWithLogging(async () => await _repository.AddRatingAsync(Request));
             if (result.Data == null && !result.Error)
-                return Unauthorized(result);
+                return BadRequest(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);
@@ -34,13 +34,13 @@ namespace ReviewService.Controllers
 
         [HttpPut("UpdateRating")]
         [ProducesResponseType(typeof(RatingResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<RatingResponseModel>> UpdateRating(RatingRequestModel Request)
         {
             var result = await ExecuteWithLogging(async () => await _repository.UpdateRatingAsync(Request));
             if (result.Data == null && !result.Error)
-                return Unauthorized(result);
+                return BadRequest(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);
@@ -94,7 +94,7 @@ namespace ReviewService.Controllers
         [ProducesResponseType(typeof(IEnumerable<RatingResponseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<IEnumerable<RatingResponseModel>>> GetRatings(string postId)
+        public async Task<ActionResult<IEnumerable<RatingResponseModel>>> GetRatingsByPostId(string postId)
         {
             var result = await ExecuteWithLogging(async () => await _repository.GetRatingsForPostAsync(postId));
             var first = result.FirstOrDefault();
