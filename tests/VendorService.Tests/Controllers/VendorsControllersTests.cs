@@ -4,6 +4,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Net;
 using System.Net.WebSockets;
 using VendorService.Controllers;
 using VendorService.Models;
@@ -156,6 +157,20 @@ namespace VendorService.Tests.Controllers
 
         }
 
+        [Fact]
+        public async Task DeleteVendor_ShouldReturnInternalServerError_WhenErrorFound()
+        {
+            //Arrange
+            var Id = _fixture.Create<string>();
+            _repositoryMock.Setup(x => x.DeleteVendorAsync(Id)).ReturnsAsync(2);
+
+            //Act
+            var result = await _controller.DeleteVendor(Id);
+
+            //Assert
+            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal((int)HttpStatusCode.InternalServerError, internalServerErrorResult.StatusCode);
+        }
 
         [Fact]
         public async Task GetVendors_ShouldReturnOkResponse_WhenDataFound()
@@ -196,6 +211,20 @@ namespace VendorService.Tests.Controllers
         }
 
         [Fact]
+        public async Task GetVendors_ShouldReturnInternalServerError_WhenErrorFound()
+        {
+            //Arrange
+            var responseMock = new[] { new VendorResponseModel(null, "", true) };
+            _repositoryMock.Setup(x => x.GetVendorsAsync()).ReturnsAsync(responseMock);
+
+            //Act
+            var result = await _controller.GetVendors().ConfigureAwait(false);
+
+            //Assert
+            var internalServerErrorResult = Assert.IsType<ObjectResult>(result.Result);
+            Assert.Equal((int)HttpStatusCode.InternalServerError, internalServerErrorResult.StatusCode);
+        }
+        [Fact]
         public async Task GetVendorsByProduct_ShouldReturnOkResponse_WhenDataFound()
         {
             //Arrange
@@ -233,6 +262,22 @@ namespace VendorService.Tests.Controllers
             result.Should().NotBeNull();
             result.Result.Should().BeAssignableTo<NotFoundObjectResult>();
             _repositoryMock.Verify(x => x.GetVendorsByProductAsync(id), Times.Once());
+        }
+
+        [Fact]
+        public async Task GetVendorsByProduct_ShouldReturnInternalServerError_WhenErrorFound()
+        {
+            //Arrange
+            var vendorMock = new[] { new VendorResponseModel(null,"",true) };
+            string id = _fixture.Create<string>();
+            _repositoryMock.Setup(x => x.GetVendorsByProductAsync(id)).ReturnsAsync(vendorMock);
+
+            //Act
+            var result = await _controller.GetVendorsByProduct(id).ConfigureAwait(false);
+
+            //Assert
+            var internalServerErrorResult = Assert.IsType<ObjectResult>(result.Result);
+            Assert.Equal((int)HttpStatusCode.InternalServerError, internalServerErrorResult.StatusCode);
         }
 
         [Fact]
@@ -276,6 +321,21 @@ namespace VendorService.Tests.Controllers
         }
 
         [Fact]
+        public async Task GetVendorsByLocation_ShouldReturnInternalServerErrorResponse_WhenErrorOccur()
+        {
+            //Arrange
+            var vendorMock = new[] { new VendorResponseModel(null,"",true) };
+            string id = _fixture.Create<string>();
+            _repositoryMock.Setup(x => x.GetVendorsByLocationAsync(id)).ReturnsAsync(vendorMock);
+
+            //Act
+            var result = await _controller.GetVendorsByLocation(id).ConfigureAwait(false);
+
+            //Assert
+            var internalServerErrorResult = Assert.IsType<ObjectResult>(result.Result);
+            Assert.Equal((int)HttpStatusCode.InternalServerError, internalServerErrorResult.StatusCode);
+        }
+        [Fact]
         public async Task GetVendor_ShouldReturnOkResponse_WhenDataFound()
         {
             //Arrange
@@ -291,5 +351,39 @@ namespace VendorService.Tests.Controllers
             result.Should().BeAssignableTo<ActionResult<VendorResponseModel>>();
             _repositoryMock.Verify(x => x.GetVendorByIdAsync(id), Times.Once());
         }
+
+        [Fact]
+        public async Task GetVendor_ShouldReturnNotFoundResponse_WhenNoDataFound()
+        {
+            //Arrange
+            string id =_fixture.Create<string> ();
+            var responseMock = new VendorResponseModel(null);
+            _repositoryMock.Setup(x => x.GetVendorByIdAsync(id)).ReturnsAsync(responseMock);
+
+            //Act
+            var result = await _controller.GetVendor(id).ConfigureAwait(false);
+
+            //Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
+            Assert.Equal((int)HttpStatusCode.NotFound, notFoundResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetVendor_ShouldReturnInternalServerError_WhenErrorFound()
+        {
+            //Arrange
+            string id = _fixture.Create<string>();
+            var responseMock=new VendorResponseModel(null,"",true);
+            _repositoryMock.Setup(x => x.GetVendorByIdAsync(id)).ReturnsAsync(responseMock);
+
+            //Act
+            var result = await _controller.GetVendor(id).ConfigureAwait(false);
+
+            //Assert
+            var internalServerErrorResult = Assert.IsType<ObjectResult>(result.Result);
+            Assert.Equal((int)HttpStatusCode.InternalServerError, internalServerErrorResult.StatusCode);
+        }
+
+
     }
 }
