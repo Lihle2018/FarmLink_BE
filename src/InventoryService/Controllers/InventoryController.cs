@@ -24,13 +24,13 @@ namespace InventoryService.Controllers
 
         [HttpPost("AddItem")]
         [ProducesResponseType(typeof(InventoryItemResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<InventoryItemResponseModel>> AddItem(InventoryItemRequestModel Request)
         {
             var result =await ExecuteWithLogging(()=>_repository.AddInventoryItemAsync(Request));
             if (result.Data == null && !result.Error)
-                return Unauthorized(result);
+                return BadRequest(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);
@@ -81,6 +81,21 @@ namespace InventoryService.Controllers
         public async Task<ActionResult<IEnumerable<InventoryItemResponseModel>>> GetItems()
         {
             var result = await ExecuteWithLogging(() => _repository.GetInventoryItemsAsync());
+            var first = result.FirstOrDefault();
+            if (first.Data == null && !first.Error)
+                return NotFound(result);
+            if (first.Error)
+                return StatusCode(500, result);
+            return Ok(result);
+        }
+
+        [HttpGet("GetItemsByProductId")]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(IEnumerable<InventoryItemResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        public async Task<ActionResult<IEnumerable<InventoryItemResponseModel>>> GetItemsByProduct(string productId)
+        {
+            var result = await ExecuteWithLogging(() => _repository.GetInventoryItemsByProductIdAsync(productId));
             var first = result.FirstOrDefault();
             if (first.Data == null && !first.Error)
                 return NotFound(result);
