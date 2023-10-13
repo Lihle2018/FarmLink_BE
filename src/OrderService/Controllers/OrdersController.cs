@@ -22,12 +22,12 @@ namespace OrderService.Controllers
         [HttpPost("AddOrder")]
         [ProducesResponseType(typeof(OrderResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<OrderResponseModel>> AddOrder(OrderRequestModel Request)
         {
             var result = await ExecuteWithLogging(()=> _repository.AddOrderAsync(Request));
             if (result.Data == null && !result.Error)
-                return Unauthorized(result);
+                return BadRequest(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);
@@ -39,7 +39,7 @@ namespace OrderService.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<OrderResponseModel>> GetOrder(string Id)
         {
-            var result = await ExecuteWithLogging(() => _repository.GetOrderByAsync(Id));
+            var result = await ExecuteWithLogging(() => _repository.GetOrderAsync(Id));
             if (result.Data == null && !result.Error)
                 return NotFound(result);
             if (result.Error)
@@ -62,7 +62,7 @@ namespace OrderService.Controllers
             return Ok(result);
         }
 
-            [HttpPut("UpdateOrder")]
+        [HttpPut("UpdateOrder")]
         [ProducesResponseType(typeof(OrderResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]

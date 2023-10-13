@@ -8,7 +8,7 @@ namespace OrderService.Repositories.Interfaces
         Task<OrderResponseModel> UpdateOrderAsync(OrderRequestModel Request);
         Task<long> DeleteOrderAsync(string Id);
         Task<long> SoftDeleteOrderAsync(string Id);
-        Task<OrderResponseModel> GetOrderByAsync(string Id);
+        Task<OrderResponseModel> GetOrderAsync(string Id);
         Task<IEnumerable<OrderResponseModel>> GetOrdersAsync();
     }
 }

@@ -50,7 +50,7 @@ namespace OrderService.Repositories
             }
         }
 
-        public async Task<OrderResponseModel> GetOrderByAsync(string Id)
+        public async Task<OrderResponseModel> GetOrderAsync(string Id)
         {
             try
             {
