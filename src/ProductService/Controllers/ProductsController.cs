@@ -9,11 +9,11 @@ namespace ProductService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductController : ControllerBase
+    public class ProductsController : ControllerBase
     {
         private readonly IProductRepository _repository;
-        private readonly ILogger<ProductController> _logger;
-        public ProductController(ILogger<ProductController> logger, IProductRepository repository)
+        private readonly ILogger<ProductsController> _logger;
+        public ProductsController(ILogger<ProductsController> logger, IProductRepository repository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -22,12 +22,12 @@ namespace ProductService.Controllers
         [HttpPost("AddProduct")]
         [ProducesResponseType(typeof(ProductResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<ProductResponseModel>> CreateProduct(ProductRequestModel Request)
         {
             var result = await ExecuteWithLogging(() => _repository.CreateProductAsync(Request));
             if (result.Data == null && !result.Error)
-                return Unauthorized(result);
+                return BadRequest(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);
