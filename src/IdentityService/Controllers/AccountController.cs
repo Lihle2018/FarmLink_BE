@@ -28,9 +28,9 @@ namespace IdentityService.Controllers
 
         [HttpPost("AddUser")]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(UserResponseModel), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<UserResponseModel>> CreateUserAsync(UserRequestModel user)
+        public async Task<ActionResult<UserResponseModel>> AddUser(UserRequestModel user)
         {
             var result = await ExecuteWithLogging(async () =>
             {
@@ -49,7 +49,7 @@ namespace IdentityService.Controllers
                 return newUser;
             });
             if (result.Data == null && !result.Error)
-                return Unauthorized(result);
+                return BadRequest(result);
             if (result.Error)
                 return StatusCode(500, result);
             return Ok(result);

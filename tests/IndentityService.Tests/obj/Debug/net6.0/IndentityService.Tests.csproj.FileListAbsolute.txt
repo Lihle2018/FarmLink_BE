@@ -130,3 +130,7 @@ C:\FarmLink\tests\IndentityService.Tests\obj\Debug\net6.0\refint\IndentityServic
 C:\FarmLink\tests\IndentityService.Tests\obj\Debug\net6.0\IndentityService.Tests.pdb
 C:\FarmLink\tests\IndentityService.Tests\obj\Debug\net6.0\IndentityService.Tests.genruntimeconfig.cache
 C:\FarmLink\tests\IndentityService.Tests\obj\Debug\net6.0\ref\IndentityService.Tests.dll
+C:\FarmLink\tests\IndentityService.Tests\bin\Debug\net6.0\FluentAssertions.dll
+C:\FarmLink\tests\IndentityService.Tests\bin\Debug\net6.0\System.Configuration.ConfigurationManager.dll
+C:\FarmLink\tests\IndentityService.Tests\bin\Debug\net6.0\System.Security.Cryptography.ProtectedData.dll
+C:\FarmLink\tests\IndentityService.Tests\bin\Debug\net6.0\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
