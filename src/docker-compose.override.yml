@@ -2,6 +2,15 @@ version: '3.4'
 
 services:
 
+  rabbitmq:
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   vendorsdb:
     container_name: farmlink_vendorsdb
     restart: always
@@ -89,6 +98,7 @@ services:
     ports:
         - "6379:6379"
   customerservice:
+
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
