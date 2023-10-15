@@ -27,23 +27,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VendorService", "VendorServ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedisCache", "RedisCache\RedisCache.csproj", "{8860DEC9-9626-4B81-8ABD-7B10AECAD7C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorService.Tests", "..\tests\VendorService.Tests\VendorService.Tests.csproj", "{DF1B2FB8-DF64-4AA3-A39F-9944E895CF7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VendorService.Tests", "..\tests\VendorService.Tests\VendorService.Tests.csproj", "{DF1B2FB8-DF64-4AA3-A39F-9944E895CF7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReviewService.Tests", "..\tests\ReviewService.Tests\ReviewService.Tests.csproj", "{CEE18BCA-2864-4BAF-8A86-628823888B7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReviewService.Tests", "..\tests\ReviewService.Tests\ReviewService.Tests.csproj", "{CEE18BCA-2864-4BAF-8A86-628823888B7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PromotionService.Tests", "..\tests\PromotionService.Tests\PromotionService.Tests.csproj", "{3FA1E4C1-71F9-4CDB-9DB5-00CD84BC336C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PromotionService.Tests", "..\tests\PromotionService.Tests\PromotionService.Tests.csproj", "{3FA1E4C1-71F9-4CDB-9DB5-00CD84BC336C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductService.Tests", "..\tests\ProductService.Tests\ProductService.Tests.csproj", "{7813B4D2-42CA-4B90-A8E6-51F6EF0BFD34}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProductService.Tests", "..\tests\ProductService.Tests\ProductService.Tests.csproj", "{7813B4D2-42CA-4B90-A8E6-51F6EF0BFD34}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Tests", "..\tests\OrderService.Tests\OrderService.Tests.csproj", "{AAD7418A-0E2B-40F5-BCC5-5E6528C85EE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderService.Tests", "..\tests\OrderService.Tests\OrderService.Tests.csproj", "{AAD7418A-0E2B-40F5-BCC5-5E6528C85EE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryService.Tests", "..\tests\InventoryService.Tests\InventoryService.Tests.csproj", "{D9915404-837E-4FCF-925E-24A3DB897914}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryService.Tests", "..\tests\InventoryService.Tests\InventoryService.Tests.csproj", "{D9915404-837E-4FCF-925E-24A3DB897914}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IndentityService.Tests", "..\tests\IndentityService.Tests\IndentityService.Tests.csproj", "{A26CE500-F2CD-47BF-984F-343CA546F3D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IndentityService.Tests", "..\tests\IndentityService.Tests\IndentityService.Tests.csproj", "{A26CE500-F2CD-47BF-984F-343CA546F3D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomerService.Tests", "..\tests\CustomerService.Tests\CustomerService.Tests.csproj", "{11E16FFB-6183-4694-B0DC-A16E3CA83A8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomerService.Tests", "..\tests\CustomerService.Tests\CustomerService.Tests.csproj", "{11E16FFB-6183-4694-B0DC-A16E3CA83A8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommunicationService.Tests", "..\tests\CommunicationService.Tests\CommunicationService.Tests.csproj", "{949958D7-6E3D-41A3-BD58-149680D962B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommunicationService.Tests", "..\tests\CommunicationService.Tests\CommunicationService.Tests.csproj", "{949958D7-6E3D-41A3-BD58-149680D962B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RabbitMq", "RabbitMq\RabbitMq.csproj", "{462FD5FA-81D0-44C5-BA4E-38CFC50AB403}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -135,6 +137,10 @@ Global
 		{949958D7-6E3D-41A3-BD58-149680D962B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{949958D7-6E3D-41A3-BD58-149680D962B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{949958D7-6E3D-41A3-BD58-149680D962B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{462FD5FA-81D0-44C5-BA4E-38CFC50AB403}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{462FD5FA-81D0-44C5-BA4E-38CFC50AB403}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{462FD5FA-81D0-44C5-BA4E-38CFC50AB403}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{462FD5FA-81D0-44C5-BA4E-38CFC50AB403}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
